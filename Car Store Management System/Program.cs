@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Models;
 using Application.Mapping;
 using Application.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Car_Store_Management_System
 {
@@ -25,13 +28,30 @@ namespace Car_Store_Management_System
             builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbContext")));
 
+            builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
+            builder.Services.AddScoped<IUserRepository, SQLUserRepository>();
+            builder.Services.AddScoped<ITokenRepository, SQLTokenRepository>();
+
             // افزودن Identity برای مدیریت کاربران و نقش‌ها
             builder.Services.AddIdentity<User, IdentityRole>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
 
-            builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
-            builder.Services.AddScoped<IUserRepository, SQLUserRepository>();
+            // اضافه کردن Authentication به سرویس‌ها
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = builder.Configuration["JWT:Issuer"],
+                        ValidAudience = builder.Configuration["JWT:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
+                    };
+                });
 
 
             var app = builder.Build();

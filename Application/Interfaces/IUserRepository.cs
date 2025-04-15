@@ -10,5 +10,6 @@ namespace Application.Interfaces
     public interface IUserRepository
     {
         Task<bool> RegisterAsync(User user, string password);
+        Task<User> LoginAsync(User user, string password);
     }
 }

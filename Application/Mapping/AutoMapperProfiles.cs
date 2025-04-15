@@ -14,6 +14,7 @@ namespace Application.Mapping
         public AutoMapperProfiles()
         {
             CreateMap<User,RegisterRequestDto>().ReverseMap();
+            CreateMap<User,LoginRequestDto>().ReverseMap();
         }
     }
 }

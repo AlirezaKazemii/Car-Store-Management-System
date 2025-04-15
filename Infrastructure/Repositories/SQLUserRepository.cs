@@ -19,16 +19,35 @@ namespace Infrastructure.Repositories
             _userManager = userManager;
         }
 
+        public async Task<User> LoginAsync(User user, string password)
+        {
+            var userResult = await _userManager.FindByNameAsync(user.UserName);
+
+            if(userResult is null)
+                return null;
+
+            var chekPass = await _userManager.CheckPasswordAsync(userResult,password);
+
+            if(!chekPass) 
+                return null;
+
+            return userResult;
+
+        }
+
         public async Task<bool> RegisterAsync(User user, string password)
         {
 
             var userResult = await _userManager.CreateAsync(user, password);
 
-            //if (!userResult.Succeeded)
-            //    return false;
+            if (!userResult.Succeeded)
+                return false;
 
             if (user.Role != null)
-                await _userManager.AddToRoleAsync(user, user.Role);
+                userResult = await _userManager.AddToRoleAsync(user, user.Role);
+
+            if(!userResult.Succeeded) 
+                return false;
 
             return true;
         }

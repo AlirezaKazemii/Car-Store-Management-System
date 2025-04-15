@@ -34,7 +34,11 @@ namespace Infrastructure.Data
 
             var managerRoleId = "3b30be5a-525f-4ca2-877e-950378d8a5c1";
             var buyerRoleId = "67d3150a-0ae9-4fe3-81f5-9bcaad261855";
+            
+            
             var sellerRoleId = "0312a64f-f09d-4f57-8665-42aa66483f5b";
+
+
 
             var roles = new List<IdentityRole>
             {
