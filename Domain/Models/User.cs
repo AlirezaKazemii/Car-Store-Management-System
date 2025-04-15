@@ -13,10 +13,15 @@ namespace Domain.Models
         public string Role { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime? LastLogin { get; private set; }
+        public string? OtpCode { get; private set; }
+        public DateTime? OtpGeneratedAt { get; private set; }
 
         //public ICollection<Review> Reviews { get; private set; }
 
+        public User()
+        {
 
+        }
 
         public User(string userName, string email, string phoneNumber, string role)
         {
@@ -25,13 +30,32 @@ namespace Domain.Models
             Email = email;
             PhoneNumber = phoneNumber;
             Role = role;
+            CreatedAt = DateTime.Now;
         }
 
-        public User()
+        public string GenerateOtp()
         {
-            
+            OtpCode = new Random().Next(1000, 9999).ToString();
+            OtpGeneratedAt = DateTime.Now;
+            return OtpCode;
         }
 
-    
+        // expired
+        public void ClearOtp()
+        {
+            OtpCode = null;
+            OtpGeneratedAt = null;
+        }
+
+        public void SetLastLogin(DateTime? lastLogin)
+        {
+            LastLogin = lastLogin;
+        }
+
+        public void SetCreatedAt(DateTime createdAt)
+        {
+            CreatedAt = createdAt;
+        }
+
     }
 }

@@ -45,7 +45,7 @@ namespace Car_Store_Management_System.Controllers
 
         [HttpPost]
         [Route("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto, string otpCode)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -57,11 +57,33 @@ namespace Car_Store_Management_System.Controllers
             if(userResult is null)
                 return NotFound("User not found Or Password is incorrect!");
 
+            var Otp = await _userRepository.VerifyOtpCode(user, otpCode);
+
+            if (!Otp)
+                return BadRequest("The Otp code entered is incorrect OR expired Otp code");
+
             var jwtToken =  _tokenRepository.CreateJwtToken(userResult);
 
             return Ok(jwtToken);
 
         }
+
+        [HttpPost]
+        [Route("SendOtp")]
+        public async Task<IActionResult> SendOtp([FromBody] OtpRequestDto otpRequestDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var otpCode = await _userRepository.SendOtpCode(otpRequestDto.PhoneNumber);
+
+            if (otpCode is null)
+                return NotFound("User not found!");
+
+            return Ok(otpCode);
+        }
+
+
     }   
 }
     

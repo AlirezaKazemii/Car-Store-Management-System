@@ -11,5 +11,8 @@ namespace Application.Interfaces
     {
         Task<bool> RegisterAsync(User user, string password);
         Task<User> LoginAsync(User user, string password);
+        Task<string> SendOtpCode(string phoneNumber);
+        Task<bool> VerifyOtpCode(User user, string otpCode);
+
     }
 }
