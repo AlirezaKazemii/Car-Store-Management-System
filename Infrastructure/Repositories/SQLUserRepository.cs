@@ -1,7 +1,9 @@
 ﻿using Application.Interfaces;
+using Azure.Core;
 using Domain.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -95,6 +97,43 @@ namespace Infrastructure.Repositories
             existUser.SetLastLogin(DateTime.Now);
             await _userManager.UpdateAsync(existUser);
 
+
+            return true;
+        }
+
+        public async Task<bool> ResetPasswordAsync(string id, string CurrentPassword, string NewPassword)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user is null)
+                return false;
+
+            var checkPassword = await _userManager.CheckPasswordAsync(user, CurrentPassword);
+
+            if(!checkPassword)
+                return false;
+
+            var result = await _userManager.ChangePasswordAsync(user,CurrentPassword,NewPassword);
+
+            if(!result.Succeeded)
+                return false;
+
+            return true;
+        }
+
+        public async Task<bool> ForgotPasswordAsync(string userName, string newPassword, string otpCode)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+
+            if(user is null)
+                return false;
+
+            if(user.OtpCode != otpCode)
+                return false;
+
+            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var resetPassword = await _userManager.ResetPasswordAsync(user,resetToken,newPassword);
 
             return true;
         }

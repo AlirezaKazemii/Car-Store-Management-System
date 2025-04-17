@@ -30,7 +30,7 @@ namespace Infrastructure.Repositories
 
             var claims = new List<Claim>();
             claims.Add(new Claim(ClaimTypes.Name , user.UserName));
-
+            claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id));
             claims.Add(new Claim(ClaimTypes.Role , user.Role));
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]));

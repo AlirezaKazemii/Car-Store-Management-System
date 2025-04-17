@@ -6,6 +6,8 @@ using Application.Mapping;
 using AutoMapper;
 using Application.Interfaces;
 using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Car_Store_Management_System.Controllers
 {
@@ -81,6 +83,42 @@ namespace Car_Store_Management_System.Controllers
                 return NotFound("User not found!");
 
             return Ok(otpCode);
+        }
+
+        [Authorize(Roles = "Buyer,Seller,Manager")]
+        [HttpPut]
+        [Route("ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User identity not found.");
+
+            var Result = await _userRepository.ResetPasswordAsync(userId, request.CurrentPassword, request.NewPassword);
+
+            if (!Result)
+                return BadRequest("User is not found OR New password is incorrect.");
+
+            return Ok("Password updated.");
+        }
+
+        [HttpPut]
+        [Route("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswrodRequestDto request, string otpCode)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userResult = await _userRepository.ForgotPasswordAsync(request.UserName, request.NewPassword, otpCode);
+
+            if (!userResult)
+                return BadRequest("invalid input (user is not found or otp code is incorrect");
+
+            return Ok("Password updated.");
         }
 
 
