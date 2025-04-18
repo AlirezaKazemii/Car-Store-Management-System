@@ -9,9 +9,10 @@ namespace Domain.Models
     public class Order
     {
 
-        public Guid Id { get; private set; }
-        //public Guid CarId { get; private set; }
-        //public Guid UserId { get; private set; }
+        public string Id { get; private set; }
+        public string CarId { get; private set; }
+        public string UserId { get; private set; }
+        public string CustomerId { get; set; }
 
 
         public DateTime OrderDate { get; private set; }
@@ -20,23 +21,24 @@ namespace Domain.Models
         public string InvoiceNumber { get; private set; }
         public paymentStatus PaymentStatus { get; private set; }
 
-        //public User User { get; private set; }
-        //public Car car { get; private set; }
+        public User User { get; private set; }
+        public Car car { get; private set; }
+        public Customer Customer { get; set; }
+        public Transaction Transaction { get; private set; }
 
-        //public Transaction Transaction { get; private set; }
 
-
-        //public Order(Guid carId, Guid userId, decimal totalAmount)
-        //{
-        //    Id = Guid.NewGuid();
-        //    CarId = carId;
-        //    UserId = userId;
-        //    OrderDate = DateTime.Now;
-        //    TotalAmount = totalAmount;
-        //    Status = OrderStatus.Pending;
-        //    PaymentStatus = paymentStatus.Unpaid;
-        //    InvoiceNumber = GenerateInvoiceNumber();
-        //}
+        public Order(string carId, string userId,string  customerId ,decimal totalAmount)
+        {
+            Id = Guid.NewGuid().ToString();
+            CarId = carId;
+            UserId = userId;
+            CustomerId = customerId;
+            OrderDate = DateTime.Now;
+            TotalAmount = totalAmount;
+            Status = OrderStatus.Pending;
+            PaymentStatus = paymentStatus.Unpaid;
+            InvoiceNumber = GenerateInvoiceNumber();
+        }
 
         public Order()
         {

@@ -1,19 +1,14 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Domain.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
 {
     public class AppDbContext : IdentityDbContext<User>
     {
         public AppDbContext()
-        {            
+        {
         }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
@@ -22,7 +17,7 @@ namespace Infrastructure.Data
 
         public DbSet<Car> Cars { get; set; }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<Customer> Customers { get; set; }  
+        public DbSet<Customer> Customers { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Review> Reviews { get; set; }
@@ -34,11 +29,7 @@ namespace Infrastructure.Data
 
             var managerRoleId = "3b30be5a-525f-4ca2-877e-950378d8a5c1";
             var buyerRoleId = "67d3150a-0ae9-4fe3-81f5-9bcaad261855";
-            
-            
             var sellerRoleId = "0312a64f-f09d-4f57-8665-42aa66483f5b";
-
-
 
             var roles = new List<IdentityRole>
             {
@@ -66,6 +57,78 @@ namespace Infrastructure.Data
             };
 
             builder.Entity<IdentityRole>().HasData(roles);
+
+
+            // User and Customer (1:1)
+            builder.Entity<User>()
+                .HasOne(u => u.Customer)
+                .WithOne(c => c.user)
+                .HasForeignKey<Customer>(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // User and Car (1:many)
+            builder.Entity<User>()
+                .HasMany(u => u.Cars)
+                .WithOne(c => c.Seller)
+                .HasForeignKey(c => c.SellerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // User and Notification (1:many)
+            builder.Entity<Notification>()
+                .HasOne(n => n.user)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(n => n.UserId);
+
+            // User and Review (1:many)
+            builder.Entity<Review>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.Reviews)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Car and CarImage (1:many)
+            builder.Entity<CarImage>()
+                .HasOne(i => i.Car)
+                .WithMany(c => c.Images)
+                .HasForeignKey(i => i.CarId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Car and Review (1:many)
+            builder.Entity<Review>()
+                .HasOne(r => r.Car)
+                .WithMany(c => c.Reviews)
+                .HasForeignKey(r => r.CarId)
+                .OnDelete(DeleteBehavior.Restrict);                 
+
+            // Car and Category (many:many)
+            builder.Entity<Car>()
+                .HasMany(c => c.CarCategories)
+                .WithMany(cat => cat.Cars);
+
+            // Order and Customer (1:many)
+            builder.Entity<Order>()
+                .HasOne(o => o.Customer)
+                .WithMany(c => c.Orders)
+                .HasForeignKey(o => o.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Order and Car (1:1)
+            builder.Entity<Order>()
+                .HasOne(o => o.car)
+                .WithOne(c => c.Order)
+                .HasForeignKey<Order>(o => o.CarId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Order and Transaction (1:1)
+            builder.Entity<Transaction>()
+                .HasOne(t => t.Order)
+                .WithOne(o => o.Transaction)
+                .HasForeignKey<Transaction>(t => t.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+
+            // car and category 
+            // نیازی به پیکربندی ندارد 
 
         }
 

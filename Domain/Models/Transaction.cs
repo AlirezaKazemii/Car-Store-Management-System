@@ -9,8 +9,8 @@ namespace Domain.Models
     public class Transaction
     {
         
-        public Guid Id { get; set; }
-        //public Guid OrderId { get; set; }
+        public string Id { get; set; }
+        public string OrderId { get; set; }
 
         public DateTime TransactionDate { get; set; }
         public decimal Amount { get; set; }
@@ -19,22 +19,23 @@ namespace Domain.Models
         public string? ReferenceNumber { get; set; }
         public string? BankName { get; set; }
 
-        //public Order Order { get; set; }
+        public Order Order { get; set; }
+        public ICollection<Notification> Notifications { get; set; }
 
         public Transaction()
         {
             
         }
 
-        //public Transaction(Guid orderId,decimal amount, string paymentMethod)
-        //{
-        //    Id = Guid.NewGuid();
-        //    OrderId = OrderId;
-        //    Amount = amount;
-        //    PaymentMethod = paymentMethod;
-        //    TransactionDate = DateTime.Now;
-        //    Status = TransactionStatus.Pending;
-        //}
+        public Transaction(Guid orderId, decimal amount, string paymentMethod)
+        {
+            Id = Guid.NewGuid().ToString();
+            OrderId = OrderId;
+            Amount = amount;
+            PaymentMethod = paymentMethod;
+            TransactionDate = DateTime.Now;
+            Status = TransactionStatus.Pending;
+        }
 
         public enum TransactionStatus
         {

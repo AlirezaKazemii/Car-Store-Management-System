@@ -8,13 +8,17 @@ namespace Domain.Models
 {
     public class Customer
     {
-        public Guid Id { get; private set; }
+        public string Id { get; private set; }
+        public string UserId { get; set; }
+
         public string FullName { get; private set; }
         public string Email { get; private set; }
         public string PhoneNumber { get; private set; }
         public string Address { get; private set; }
 
-        //public ICollection<Order> Orders { get; private set; }
+        public User user { get; set; }
+        public ICollection<Order> Orders { get; private set; }
+        public ICollection<Review> Reviews { get; set; }
 
         //امتیاز وفاداری یا امتیاز جمع شده
         public int LoyaltyPoints { get; private set; }
@@ -28,7 +32,7 @@ namespace Domain.Models
 
         public Customer(string fullName, string email, string phoneNumber, string address)
         {
-            Id = Guid.NewGuid();
+            Id = Guid.NewGuid().ToString();
             FullName = fullName;
             Email = email;
             PhoneNumber = phoneNumber;

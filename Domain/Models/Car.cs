@@ -8,7 +8,7 @@ namespace Domain.Models
 {
     public class Car
     {
-        public Guid Id { get; private set; }
+        public string Id { get; private set; }
         public string Brand { get; private set; }
         public string Model { get; private set; }
         public int Year { get; private set; }
@@ -19,9 +19,12 @@ namespace Domain.Models
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
 
-        //public ICollection<CarImage> Images { get; private set; }
-        //public ICollection<CarCategory> CarCategories { get; private set; }
-        //public ICollection<Review> Reviews { get; private set; }
+        public string SellerId { get; set; }
+        public User Seller { get; set; }
+        public Order Order { get; set; }
+        public ICollection<CarImage> Images { get; private set; }
+        public ICollection<Review> Reviews  { get; set; }
+        public ICollection<Category> CarCategories { get; private set; }
 
         public Car()
         {
@@ -30,7 +33,7 @@ namespace Domain.Models
 
         public Car(string brand, string model, int year, string color, decimal price, string vIN, CarStatus status)
         {
-            Id = Guid.NewGuid();
+            Id = Guid.NewGuid().ToString();
             Brand = brand;
             Model = model;
             Year = year;
@@ -64,11 +67,11 @@ namespace Domain.Models
             UpdatedAt = DateTime.Now;
         }
 
-        //public void AddImage(string imageUrl)
-        //{
-        //    CarImage carImage = new CarImage(Id,imageUrl);
-        //    Images.Add(carImage);
-        //}
+        public void AddImage(string imageUrl)
+        {
+            CarImage carImage = new CarImage(Id, imageUrl);
+            Images.Add(carImage);
+        }
 
     }
 }

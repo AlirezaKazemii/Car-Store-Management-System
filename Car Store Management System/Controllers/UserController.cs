@@ -1,12 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Application.DTOs;
-using Domain.Models;
-using Application.Mapping;
-using AutoMapper;
+﻿using Application.DTOs;
 using Application.Interfaces;
-using Microsoft.AspNetCore.Identity.Data;
+using AutoMapper;
+using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace Car_Store_Management_System.Controllers
@@ -31,15 +28,15 @@ namespace Car_Store_Management_System.Controllers
         [Route("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             // Map Dto to Model
-            var user = _autoMapper.Map<User>(registerRequestDto);            
+            var user = _autoMapper.Map<User>(registerRequestDto);
 
             var result = await _userRepository.RegisterAsync(user, registerRequestDto.Password);
 
-            if(!result)
+            if (!result)
                 return BadRequest("Invalid Input");
 
             return Ok("User added successfully");
@@ -56,7 +53,7 @@ namespace Car_Store_Management_System.Controllers
 
             var userResult = await _userRepository.LoginAsync(user, loginRequestDto.Password);
 
-            if(userResult is null)
+            if (userResult is null)
                 return NotFound("User not found Or Password is incorrect!");
 
             var Otp = await _userRepository.VerifyOtpCode(user, otpCode);
@@ -64,7 +61,7 @@ namespace Car_Store_Management_System.Controllers
             if (!Otp)
                 return BadRequest("The Otp code entered is incorrect OR expired Otp code");
 
-            var jwtToken =  _tokenRepository.CreateJwtToken(userResult);
+            var jwtToken = _tokenRepository.CreateJwtToken(userResult);
 
             return Ok(jwtToken);
 
@@ -108,20 +105,23 @@ namespace Car_Store_Management_System.Controllers
 
         [HttpPut]
         [Route("ForgotPassword")]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswrodRequestDto request, string otpCode)
+        public async Task<IActionResult> ForgotPassword
+            ([FromBody] ForgotPasswrodRequestDto request, string otpCode)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var userResult = await _userRepository.ForgotPasswordAsync(request.UserName, request.NewPassword, otpCode);
 
-            if (!userResult)
-                return BadRequest("invalid input (user is not found or otp code is incorrect");
+            return userResult ?
+                Ok("Password updated.") :
+                BadRequest("invalid input (user is not found or otp code is incorrect");
+            //if (!userResult) ;
+            //    return BadRequest("invalid input (user is not found or otp code is incorrect");
 
-            return Ok("Password updated.");
+            //return Ok("Password updated.");
         }
 
 
-    }   
+    }
 }
-    

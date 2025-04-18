@@ -8,22 +8,24 @@ namespace Domain.Models
 {
     public class CarImage
     {
-        public Guid Id { get; private set; }
-        //public Guid CarId { get; private set; }
+        public string Id { get; private set; }
+        public string CarId { get; private set; }
         public string ImageUrl { get; private set; }
         public DateTime UploadedAt { get; private set; }
+
+        public Car Car { get; set; }
 
         public CarImage()
         {
             
         }
 
-        //public CarImage(Guid carId, string imageUrl)
-        //{
-        //    Id = Guid.NewGuid();
-        //    CarId = carId;
-        //    ImageUrl = imageUrl;
-        //    UploadedAt = DateTime.Now;
-        //}
+        public CarImage(string carId, string imageUrl)
+        {
+            Id = Guid.NewGuid().ToString();
+            CarId = carId;
+            ImageUrl = imageUrl;
+            UploadedAt = DateTime.Now;
+        }
     }
 }
