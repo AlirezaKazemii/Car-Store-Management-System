@@ -13,7 +13,7 @@ namespace Domain.Models
         public string ImageUrl { get; private set; }
         public DateTime UploadedAt { get; private set; }
 
-        public Car Car { get; set; }
+        public Car Car { get; private set; }
 
         public CarImage()
         {

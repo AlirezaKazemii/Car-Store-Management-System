@@ -116,6 +116,7 @@ namespace Car_Store_Management_System.Controllers
             return userResult ?
                 Ok("Password updated.") :
                 BadRequest("invalid input (user is not found or otp code is incorrect");
+
             //if (!userResult) ;
             //    return BadRequest("invalid input (user is not found or otp code is incorrect");
 

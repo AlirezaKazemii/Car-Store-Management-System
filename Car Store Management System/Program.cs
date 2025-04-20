@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
+using Application.CommandHandlers;
+using Domain.Interfaces;
 
 namespace Car_Store_Management_System
 {
@@ -24,14 +26,46 @@ namespace Car_Store_Management_System
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            //builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
+
+                // 🔹 تنظیم احراز هویت برای Swagger
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "Enter 'Bearer {token}' (without quotes) in the field below.",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[] {}
+                    }
+                });
+            });
 
             builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbContext")));
 
             builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
-            builder.Services.AddScoped<IUserRepository, SQLUserRepository>();
-            builder.Services.AddScoped<ITokenRepository, SQLTokenRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<ITokenRepository, TokenRepository>();
+            builder.Services.AddScoped<ICarHandler,CarHandler>();
+            builder.Services.AddScoped<ICarRepository,CarRepository>();
+            builder.Services.AddScoped<IImageStorageService,ImageStorateService>();
 
             // افزودن Identity برای مدیریت کاربران و نقش‌ها
             builder.Services.AddIdentity<User, IdentityRole>()
@@ -62,35 +96,7 @@ namespace Car_Store_Management_System
 
                 });
 
-            builder.Services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "API", Version = "v1" });
-
-                // 🔹 تنظیم احراز هویت برای Swagger
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Description = "Enter 'Bearer {token}' (without quotes) in the field below.",
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
-                    Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer"
-                });
-
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new string[] {}
-                    }
-                });
-            });
+            
 
             builder.Services.AddAuthorization(options =>
             {

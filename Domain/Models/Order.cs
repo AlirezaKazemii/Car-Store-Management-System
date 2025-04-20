@@ -12,7 +12,7 @@ namespace Domain.Models
         public string Id { get; private set; }
         public string CarId { get; private set; }
         public string UserId { get; private set; }
-        public string CustomerId { get; set; }
+        public string CustomerId { get; private set; }
 
 
         public DateTime OrderDate { get; private set; }
@@ -23,7 +23,7 @@ namespace Domain.Models
 
         public User User { get; private set; }
         public Car car { get; private set; }
-        public Customer Customer { get; set; }
+        public Customer Customer { get; private set; }
         public Transaction Transaction { get; private set; }
 
 

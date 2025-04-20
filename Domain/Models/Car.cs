@@ -19,11 +19,11 @@ namespace Domain.Models
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
 
-        public string SellerId { get; set; }
-        public User Seller { get; set; }
-        public Order Order { get; set; }
+        public string SellerId { get; private set; }
+        public User Seller { get; private set; }
+        public Order Order { get; private set; }
         public ICollection<CarImage> Images { get; private set; }
-        public ICollection<Review> Reviews  { get; set; }
+        public ICollection<Review> Reviews  { get; private set; }
         public ICollection<Category> CarCategories { get; private set; }
 
         public Car()
@@ -31,7 +31,7 @@ namespace Domain.Models
             
         }
 
-        public Car(string brand, string model, int year, string color, decimal price, string vIN, CarStatus status)
+        public Car(string brand, string model, int year, string color, decimal price, string vIN, CarStatus status,string sellerId)
         {
             Id = Guid.NewGuid().ToString();
             Brand = brand;
@@ -41,23 +41,39 @@ namespace Domain.Models
             Price = price;
             VIN = vIN;
             Status = status;
+            SellerId = sellerId;
             CreatedAt = DateTime.Now;
+            Images = new List<CarImage>();
         }
-
+            
         public enum CarStatus
         {
-            New,
-            Used,
-            Sold
+            New, // خودرو جدید
+            Used, // خودرو کارکرده
+            Sold, // خودرو فروخته شده
+            Reserved, // خودردو رزرو شده
+            Inactive // خودرو غیرفعال
         }
 
-        public void UpdateDetails(string brand, string model, int year, string color, decimal price)
+        public void UpdateDetails(string brand, string model, int year, string color, decimal price,CarStatus status)
         {
+
+            if(year > DateTime.Now.Year)
+            {
+                throw new Exception("The production year cannot be older than the current year.");
+            }
+
+            if(price < 0)
+            {
+                throw new Exception("The price must be greater than zero.");
+            }
+
             Brand = brand;
             Model = model;
             Year = year;
             Color = color;
             Price= price;   
+            Status = status;
             UpdatedAt = DateTime.Now;
         }
 

@@ -13,11 +13,11 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
-    public class SQLUserRepository : IUserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly UserManager<User> _userManager;
 
-        public SQLUserRepository(UserManager<User> userManager)
+        public UserRepository(UserManager<User> userManager)
         {
             _userManager = userManager;
         }

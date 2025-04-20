@@ -1,4 +1,5 @@
 ﻿using Application.DTOs;
+using Application.DTOs.Car;
 using AutoMapper;
 using Domain.Models;
 using System;
@@ -16,6 +17,17 @@ namespace Application.Mapping
         {
             CreateMap<User,RegisterRequestDto>().ReverseMap();
             CreateMap<User,LoginRequestDto>().ReverseMap();
+            CreateMap<Car,GetAllForSellerDto>()
+                .ForMember(dest => dest.Images,
+                 opt => opt.MapFrom(src => src.Images.Select(i => i.ImageUrl).ToList()));
+
+            CreateMap<Car,GetAllForManagerDto>()
+                .ForMember(dest => dest.Images,
+                 opt => opt.MapFrom(src => src.Images.Select(i => i.ImageUrl).ToList()));
+
+            CreateMap<Car,GetByIdCarDto>()
+                .ForMember(dest => dest.Images,
+                 opt => opt.MapFrom(src => src.Images.Select(i => i.ImageUrl).ToList()));
         }
     }
 }

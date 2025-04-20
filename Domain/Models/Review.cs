@@ -11,7 +11,7 @@ namespace Domain.Models
         public string Id { get; private set; }
         public string CarId { get; private set; }
         public string UserId { get; private set; }
-        public string CustomerId { get; set; }
+        public string CustomerId { get; private set; }
 
         public int Rating { get; private set; } // 1 to 5
         public string Comment { get; private set; }
@@ -19,7 +19,7 @@ namespace Domain.Models
 
         public Car Car { get; private set; }
         public User User { get; private set; }
-        public Customer Customer { get; set; }
+        public Customer Customer { get; private set; }
 
         public Review()
         {

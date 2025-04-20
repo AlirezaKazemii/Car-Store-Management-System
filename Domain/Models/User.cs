@@ -16,11 +16,10 @@ namespace Domain.Models
         public string? OtpCode { get; private set; }
         public DateTime? OtpGeneratedAt { get; private set; }
 
-
-        public Customer Customer { get; set; } // اگر مشتری باشه 
-        public ICollection<Order> Orders { get; set; }
-        public ICollection<Car> Cars { get; set; } // اگر فروشنده باشه 
-        public ICollection<Notification> Notifications { get; set; }
+        public Customer Customer { get; private set; } // اگر مشتری باشه 
+        public ICollection<Order> Orders { get; private set; }
+        public ICollection<Car> Cars { get; private set; } // اگر فروشنده باشه 
+        public ICollection<Notification> Notifications { get; private set; }
         public ICollection<Review> Reviews { get; private set; }
 
 

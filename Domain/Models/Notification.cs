@@ -10,7 +10,7 @@ namespace Domain.Models
     {
         public string Id { get; private set; }
         public string UserId { get; private set; }
-        public string TransactionId { get; set; }
+        public string TransactionId { get; private set; }
 
         public string Message { get; private set; }
         public NotificationType Type { get; private set; }
@@ -18,7 +18,7 @@ namespace Domain.Models
         public DateTime SentAt { get; private set; }
 
         public User user { get; private set; }
-        public Transaction Transaction { get; set; }
+        public Transaction Transaction { get; private set; }
 
         public Notification(string userId,string transactionId ,string message, NotificationType type)
         {

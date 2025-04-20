@@ -9,16 +9,16 @@ namespace Domain.Models
     public class Customer
     {
         public string Id { get; private set; }
-        public string UserId { get; set; }
+        public string UserId { get; private set; }
 
         public string FullName { get; private set; }
         public string Email { get; private set; }
         public string PhoneNumber { get; private set; }
         public string Address { get; private set; }
 
-        public User user { get; set; }
+        public User user { get; private set; }
         public ICollection<Order> Orders { get; private set; }
-        public ICollection<Review> Reviews { get; set; }
+        public ICollection<Review> Reviews { get; private set; }
 
         //امتیاز وفاداری یا امتیاز جمع شده
         public int LoyaltyPoints { get; private set; }

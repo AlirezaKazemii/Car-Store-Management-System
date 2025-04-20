@@ -14,12 +14,12 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Repositories
 {
-    public class SQLTokenRepository : ITokenRepository
+    public class TokenRepository : ITokenRepository
     {
         private readonly IConfiguration _configuration;
         private readonly UserManager<User> _userManager;
 
-        public SQLTokenRepository(IConfiguration configuration, UserManager<User> userManager)
+        public TokenRepository(IConfiguration configuration, UserManager<User> userManager)
         {
             _configuration = configuration;
             _userManager = userManager;
