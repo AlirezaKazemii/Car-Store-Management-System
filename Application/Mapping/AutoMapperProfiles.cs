@@ -1,6 +1,8 @@
-﻿using Application.DTOs;
+﻿using Application.Commands.Car;
+using Application.DTOs;
 using Application.DTOs.Car;
 using AutoMapper;
+using Domain.IRepostories;
 using Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -17,6 +19,7 @@ namespace Application.Mapping
         {
             CreateMap<User,RegisterRequestDto>().ReverseMap();
             CreateMap<User,LoginRequestDto>().ReverseMap();
+
             CreateMap<Car,GetAllForSellerDto>()
                 .ForMember(dest => dest.Images,
                  opt => opt.MapFrom(src => src.Images.Select(i => i.ImageUrl).ToList()));
@@ -28,6 +31,9 @@ namespace Application.Mapping
             CreateMap<Car,GetByIdCarDto>()
                 .ForMember(dest => dest.Images,
                  opt => opt.MapFrom(src => src.Images.Select(i => i.ImageUrl).ToList()));
+
+            CreateMap<SearchCarsCommand, CarSearchFilterCommand>().ReverseMap();
+            CreateMap<Car, CarSearchFilterDto>().ReverseMap();
         }
     }
 }

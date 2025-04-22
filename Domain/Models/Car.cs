@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace Domain.Models
 {
@@ -48,11 +44,11 @@ namespace Domain.Models
             
         public enum CarStatus
         {
-            New, // خودرو جدید
-            Used, // خودرو کارکرده
-            Sold, // خودرو فروخته شده
-            Reserved, // خودردو رزرو شده
-            Inactive // خودرو غیرفعال
+            Available, // موجود
+            Inmaintenance, // درحال بررسی  یا درحال تعمیر
+            Sold, //  فروخته شده
+            Reserved, //  رزرو شده
+            Inactive //  غیرفعال
         }
 
         public void UpdateDetails(string brand, string model, int year, string color, decimal price,CarStatus status)

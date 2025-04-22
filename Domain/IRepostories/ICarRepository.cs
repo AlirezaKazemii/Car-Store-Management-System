@@ -1,9 +1,5 @@
-﻿using Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.IRepostories;
+using Domain.Models;
 
 namespace Domain.Interfaces
 {
@@ -15,5 +11,6 @@ namespace Domain.Interfaces
         Task<List<Car>> GetAllForSerller(string sellerId);
         Task<List<Car>> GetAllForManager();
         Task SaveChangeAsync();
+        Task<(List<Car> items, int totalCount)> SearchCarsAsync(SearchCarsCommand command , bool isSeller, string id);
     }
 }

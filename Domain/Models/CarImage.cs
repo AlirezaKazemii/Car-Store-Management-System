@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain.Models
+﻿namespace Domain.Models
 {
     public class CarImage
     {
@@ -17,7 +11,7 @@ namespace Domain.Models
 
         public CarImage()
         {
-            
+
         }
 
         public CarImage(string carId, string imageUrl)

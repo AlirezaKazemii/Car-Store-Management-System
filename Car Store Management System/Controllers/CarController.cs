@@ -109,6 +109,24 @@ namespace Car_Store_Management_System.Controllers
             return Ok("The car was successfully deleted.");
         }
 
+        [HttpPut("ChangeCarStatus")]
+        [Authorize(Roles = "Manager,Seller")]
+        public async Task<IActionResult> ChangeCarStatus([FromBody] ChangeCarStatusCommand command)
+        {
+            var result = await _carHandler.ChangeCarStatusAsync(command);
+
+            return result ? Ok("Car status changed.") : BadRequest("Car not found!");
+        }
+
+        [HttpGet("SearchCars")]
+        [Authorize(Roles = "Manager,Buyer,Seller")]
+        public async Task<IActionResult> SearchCars([FromQuery] CarSearchFilterCommand command)
+        {
+            var result = await _carHandler.SearchCarsAsync(command,User);
+
+            return Ok(result);
+        }
+
     }
 }
     

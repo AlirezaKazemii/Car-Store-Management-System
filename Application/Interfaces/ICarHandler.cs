@@ -19,6 +19,8 @@ namespace Application.Interfaces
         Task<List<GetAllForManagerDto>> GetAllForManager();
         Task<object?> GetByIdAsync(string carId, ClaimsPrincipal user);
         Task DeleteAsync(string carId);
+        Task<bool> ChangeCarStatusAsync(ChangeCarStatusCommand command);
+        Task<PagedResultDto<CarSearchFilterDto>> SearchCarsAsync(CarSearchFilterCommand command, ClaimsPrincipal user);
 
     }
 }
