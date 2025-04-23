@@ -137,5 +137,10 @@ namespace Infrastructure.Repositories
 
             return true;
         }
+
+        public async Task<User?> FindByIdAsync(string id)
+        {
+            return await _userManager.FindByIdAsync(id);
+        }
     }
 }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain.Models
+﻿namespace Domain.Models
 {
     public class Order
     {
@@ -16,6 +10,7 @@ namespace Domain.Models
 
 
         public DateTime OrderDate { get; private set; }
+        public DateTime UpdateAt { get; private set; }
         public OrderStatus Status { get; private set; }
         public decimal TotalAmount { get; private set; }
         public string InvoiceNumber { get; private set; }
@@ -23,18 +18,19 @@ namespace Domain.Models
 
         public User User { get; private set; }
         public Car car { get; private set; }
-        public Customer Customer { get; set; }
-        public Transaction Transaction { get; private set; }
+        public Customer Customer { get; private set; }
+        public AppTransaction Transaction { get; private set; }
 
 
-        public Order(string carId, string userId,string  customerId ,decimal totalAmount)
+        public Order(string carId, string userId, string customerId, decimal totalAmount)
         {
             Id = Guid.NewGuid().ToString();
             CarId = carId;
             UserId = userId;
             CustomerId = customerId;
-            OrderDate = DateTime.Now;
             TotalAmount = totalAmount;
+            OrderDate = DateTime.Now;
+            CustomerId = customerId;
             Status = OrderStatus.Pending;
             PaymentStatus = paymentStatus.Unpaid;
             InvoiceNumber = GenerateInvoiceNumber();
@@ -42,36 +38,41 @@ namespace Domain.Models
 
         public Order()
         {
-            
+
         }
 
         public enum OrderStatus
         {
-            Pending,
-            Confirmed,
-            Shipped,
-            Delivered,
-            Canceled
+            Pending, // سفارش ثبت شده، در انتظار بررسی مدیر
+            Approved, // تایید شده توسط مدیر
+            Rejected,  // رد شده
+            AwaitingPayment, // تایید شده، در انتظار پرداخت توسط مشتری
+            PaymentUploaded,
+            PaymentConfirmed,
+            Canceled  // لغو شده توسط مشتری یا سیستم
         }
 
         public enum paymentStatus
         {
-            Unpaid,
-            Paid,
-            Failed,
-            Refunded
+            Unpaid,  // هنوز پرداختی انجام نشده
+            Paid,  // پرداخت با موفقیت انجام شده
+            Failed,  // پرداخت ناموفق بوده
+            Refunded // مبلغ پرداختی برگشت داده شده
         }
 
         // تولید شماره فاکتور 
         private string GenerateInvoiceNumber()
         {
-            return $"INV-{DateTime.UtcNow.Ticks}";
+            return $"INV-{DateTime.Now.Ticks}";
         }
 
         //تغییر وضعیت سفارش
-        public void UpdateStatus(OrderStatus status)
+        public void UpdateStatus(OrderStatus newStatus)
         {
-            Status = status;
+            if (newStatus == Status) return;
+
+            Status = newStatus;
+            UpdateAt = DateTime.Now;
         }
 
         // ثبت پرداخت

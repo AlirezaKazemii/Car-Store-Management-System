@@ -37,6 +37,42 @@ namespace Infrastructure.Migrations
                     b.ToTable("CarCategory");
                 });
 
+            modelBuilder.Entity("Domain.Models.AppTransaction", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("BankName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PaymentReceiptFileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReferenceNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Transactions");
+                });
+
             modelBuilder.Entity("Domain.Models.Car", b =>
                 {
                     b.Property<string>("Id")
@@ -230,6 +266,9 @@ namespace Infrastructure.Migrations
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -282,42 +321,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Reviews");
-                });
-
-            modelBuilder.Entity("Domain.Models.Transaction", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("BankName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OrderId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReferenceNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId")
-                        .IsUnique();
-
-                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Domain.Models.User", b =>
@@ -572,6 +575,17 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Models.AppTransaction", b =>
+                {
+                    b.HasOne("Domain.Models.Order", "Order")
+                        .WithOne("Transaction")
+                        .HasForeignKey("Domain.Models.AppTransaction", "OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("Domain.Models.Car", b =>
                 {
                     b.HasOne("Domain.Models.User", "Seller")
@@ -607,7 +621,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Models.Notification", b =>
                 {
-                    b.HasOne("Domain.Models.Transaction", "Transaction")
+                    b.HasOne("Domain.Models.AppTransaction", "Transaction")
                         .WithMany("Notifications")
                         .HasForeignKey("TransactionId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -678,17 +692,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Models.Transaction", b =>
-                {
-                    b.HasOne("Domain.Models.Order", "Order")
-                        .WithOne("Transaction")
-                        .HasForeignKey("Domain.Models.Transaction", "OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -740,6 +743,11 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Models.AppTransaction", b =>
+                {
+                    b.Navigation("Notifications");
+                });
+
             modelBuilder.Entity("Domain.Models.Car", b =>
                 {
                     b.Navigation("Images");
@@ -761,11 +769,6 @@ namespace Infrastructure.Migrations
                 {
                     b.Navigation("Transaction")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.Models.Transaction", b =>
-                {
-                    b.Navigation("Notifications");
                 });
 
             modelBuilder.Entity("Domain.Models.User", b =>

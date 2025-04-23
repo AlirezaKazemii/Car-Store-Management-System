@@ -30,15 +30,18 @@ namespace Domain.Models
             
         }
 
-        public Customer(string fullName, string email, string phoneNumber, string address)
+        public Customer(string userId,string fullName, string email, string phoneNumber, string address)
         {
             Id = Guid.NewGuid().ToString();
+            UserId = userId;
             FullName = fullName;
             Email = email;
             PhoneNumber = phoneNumber;
             Address = address;
             CreatedAt = DateTime.Now;
             LoyaltyPoints = 0;
+            Orders = new List<Order>();
+            Reviews = new List<Review>();
         }
 
 

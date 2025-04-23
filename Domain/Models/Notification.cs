@@ -18,7 +18,7 @@ namespace Domain.Models
         public DateTime SentAt { get; private set; }
 
         public User user { get; private set; }
-        public Transaction Transaction { get; set; }
+        public AppTransaction Transaction { get; private set; }
 
         public Notification(string userId,string transactionId ,string message, NotificationType type)
         {

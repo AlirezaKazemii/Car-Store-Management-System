@@ -21,7 +21,7 @@ namespace Infrastructure.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Review> Reviews { get; set; }
-        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<AppTransaction> Transactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -120,10 +120,10 @@ namespace Infrastructure.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Order and Transaction (1:1)
-            builder.Entity<Transaction>()
+            builder.Entity<AppTransaction>()
                 .HasOne(t => t.Order)
                 .WithOne(o => o.Transaction)
-                .HasForeignKey<Transaction>(t => t.OrderId)
+                .HasForeignKey<AppTransaction>(t => t.OrderId)
                 .OnDelete(DeleteBehavior.Restrict);
             
 

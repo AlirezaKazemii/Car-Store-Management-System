@@ -1,6 +1,7 @@
 ﻿using Application.DTOs;
 using Application.Interfaces;
 using AutoMapper;
+using Domain.IRepostories;
 using Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,12 +16,14 @@ namespace Car_Store_Management_System.Controllers
         private readonly IMapper _autoMapper;
         private readonly IUserRepository _userRepository;
         private readonly ITokenRepository _tokenRepository;
+        private readonly ICustomerRepository _customerRepository;
 
-        public UserController(IMapper mapper, IUserRepository userRepository, ITokenRepository tokenRepository)
+        public UserController(IMapper mapper, IUserRepository userRepository, ITokenRepository tokenRepository,ICustomerRepository customerRepository)
         {
             _autoMapper = mapper;
             _userRepository = userRepository;
             _tokenRepository = tokenRepository;
+            _customerRepository = customerRepository;
         }
 
 
@@ -38,6 +41,12 @@ namespace Car_Store_Management_System.Controllers
 
             if (!result)
                 return BadRequest("Invalid Input");
+
+            if(user.Role == "Buyer")
+            {
+                var customer = new Customer(user.Id, user.UserName, user.Email, user.PhoneNumber, "");
+                _customerRepository.Add(customer);
+            }
 
             return Ok("User added successfully");
         }
