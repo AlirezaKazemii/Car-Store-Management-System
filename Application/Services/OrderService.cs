@@ -202,5 +202,83 @@ namespace Application.Services
 
             await _orderRepository.SaveChange();
         }
+
+        public async Task<InvoiceDto> GenerateInvoiceFromOrder(string orderId)
+        {
+            var order = await _orderRepository.GetById(orderId);
+
+            if (order is null)
+                throw new Exception("Order not found!");
+
+            if (order.Status != OrderStatus.PaymentConfirmed)
+                throw new Exception("Only users whose payment status has been confirmed have invoices.");
+
+            var invoiceDto = new InvoiceDto
+            {
+                InvoiceNumber = order.InvoiceNumber,
+                CustomerName = order.Customer.FullName,
+                CustomerPhone = order.Customer.PhoneNumber,
+                Price = order.car.Price,
+                CarTitle = $"{order.car.Brand} - {order.car.Model}",
+                orderDate = order.OrderDate,
+                PaidDate = order.Transaction.TransactionDate,
+                OrderID = order.Id
+            };
+
+            return invoiceDto;
+        }
+
+        public async Task<List<GetUserOrdersDto>> GetUserOrders(string userId)
+        {
+            var orderList = await _orderRepository.GetOrdersByUserId(userId);
+
+            if (orderList is null)
+                throw new Exception("Order not found!");
+
+            var orderListDto = new List<GetUserOrdersDto>();
+
+            foreach (var order in orderList)
+            {
+                orderListDto.Add(
+                    new GetUserOrdersDto()
+                    {
+                        OrderDate = order.OrderDate,
+                        Status = order.Status.ToString(),
+                        CarBrand = order.car.Brand,
+                        CarModel = order.car.Model,
+                        CarPrice = order.car.Price
+                    });
+            }
+
+            foreach(var order in orderListDto)
+            {
+                switch (order.Status)
+                {
+                    case "0":
+                        order.Status = "Pending";
+                        break;
+                    case "1":
+                        order.Status = "Approved";
+                        break;
+                    case "2":
+                        order.Status = "Rejected";
+                        break;
+                    case "3":
+                        order.Status = "AwaitingPayment";
+                        break;
+                    case "4":
+                        order.Status = "PaymentUploaded";
+                        break;
+                    case "5":
+                        order.Status = "PaymentConfirmed";
+                        break;
+                    case "6":
+                        order.Status = "Canceled";
+                        break;
+                }
+            }
+
+            return orderListDto;
+        }
     }
 }

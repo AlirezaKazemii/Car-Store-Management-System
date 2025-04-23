@@ -14,5 +14,6 @@ namespace Domain.IRepostories
         Task SaveChange();
         Task<List<Order>> GetAllPendingOrders();
         Task<List<Order>> GetAllPaymentUploadedOrders();
+        Task<List<Order>> GetOrdersByUserId(string userId);
     }
 }

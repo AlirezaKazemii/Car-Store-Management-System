@@ -94,5 +94,23 @@ namespace Car_Store_Management_System.Controllers
             return Ok("The order was rejected.");
         }
 
+        [HttpGet("Generate-Invoice-FromOrder")]
+        [Authorize(Roles = "buyer")]
+        public async Task<IActionResult> GenerateInvoiceFromOrder([FromQuery] GenerateInvoiceFromOrderCommand command)
+        {
+            var Result = await _orderService.GenerateInvoiceFromOrder(command.OrderId);
+
+            return Ok(Result);
+        }
+
+
+        [HttpGet("Get-user_orders")]
+        [Authorize(Roles = "Buyer")]
+        public async Task<IActionResult> GetUserOrders([FromQuery] GetUserOrdersCommand command)
+        {
+            var orderResult = await _orderService.GetUserOrders(command.UserId);
+
+            return Ok(orderResult);
+        }
     }
 }

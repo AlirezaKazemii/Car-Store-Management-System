@@ -14,5 +14,7 @@ namespace Application.Interfaces
         Task<List<GetAllPaymentUploadedOrdersDto>> GetAllPaymentUploadedOrders();
         Task ApprovePayments(string orderId);   
         Task RejectPayments(string orderId);
+        Task<InvoiceDto> GenerateInvoiceFromOrder(string orderId);
+        Task<List<GetUserOrdersDto>> GetUserOrders(string userId);
     }
 }

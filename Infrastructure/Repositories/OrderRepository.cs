@@ -24,7 +24,7 @@ namespace Infrastructure.Repositories
 
         public async Task<Order?> GetById(string orderId)
         {
-            return await _context.Orders.FirstOrDefaultAsync(x => x.Id == orderId); 
+            return await _context.Orders.Include(o => o.Customer).Include(o => o.Transaction).Include(o => o.car).FirstOrDefaultAsync(o => o.Id == orderId); 
         }
 
         public async Task SaveChange()
@@ -40,6 +40,11 @@ namespace Infrastructure.Repositories
         public async Task<List<Order>> GetAllPaymentUploadedOrders()
         {
             return await _context.Orders.Where(x => x.Status == OrderStatus.PaymentUploaded).ToListAsync();
+        }
+
+        public async Task<List<Order>> GetOrdersByUserId(string userId)
+        {
+            return await _context.Orders.Where(o => o.UserId == userId).Include(o => o.car).ToListAsync();
         }
     }
 }
