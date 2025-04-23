@@ -156,7 +156,7 @@ namespace Application.CommandHandlers
             return true;
         }
 
-        public async Task<PagedResultDto<CarSearchFilterDto>> SearchCarsAsync(CarSearchFilterCommand command , ClaimsPrincipal user)
+        public async Task<PagedResultDto<CarSearchFilterDto>> SearchCarsAsync(CarSearchFilterCommand command, ClaimsPrincipal user)
         {
 
             var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -169,7 +169,7 @@ namespace Application.CommandHandlers
             bool isSeller = user.IsInRole("Seller");
 
             var mappedToSearchCarsCommand = _mapper.Map<SearchCarsCommand>(command);
-            var (listOfCars, totalCount) = await _carRepository.SearchCarsAsync(mappedToSearchCarsCommand , isSeller, userId);
+            var (listOfCars, totalCount) = await _carRepository.SearchCarsAsync(mappedToSearchCarsCommand, isSeller, userId);
 
             var CarsDto = _mapper.Map<List<CarSearchFilterDto>>(listOfCars);
 

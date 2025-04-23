@@ -5,12 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.DTOs
+namespace Application.DTOs.User
 {
-    public class OtpRequestDto
+    public class ForgotPasswrodRequestDto
     {
         [Required]
-        public string PhoneNumber { get; set; }
+        public string UserName { get; set; }
 
+        [Required]
+        public string NewPassword { get; set; }
     }
 }

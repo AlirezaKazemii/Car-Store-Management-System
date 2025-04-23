@@ -31,7 +31,7 @@ namespace Domain.Models
             
         }
 
-        public Car(string brand, string model, int year, string color, decimal price, string vIN, CarStatus status)
+        public Car(string brand, string model, int year, string color, decimal price, string vIN, CarStatus status, string sellerId)
         {
             Id = Guid.NewGuid().ToString();
             Brand = brand;
@@ -41,23 +41,39 @@ namespace Domain.Models
             Price = price;
             VIN = vIN;
             Status = status;
+            SellerId = sellerId;
             CreatedAt = DateTime.Now;
+            Images = new List<CarImage>();
         }
 
         public enum CarStatus
         {
-            New,
-            Used,
-            Sold
+            Available, // موجود
+            Inmaintenance, // درحال بررسی  یا درحال تعمیر
+            Sold, //  فروخته شده
+            Reserved, //  رزرو شده
+            Inactive //  غیرفعال
         }
 
-        public void UpdateDetails(string brand, string model, int year, string color, decimal price)
+        public void UpdateDetails(string brand, string model, int year, string color, decimal price, CarStatus status)
         {
+
+            if (year > DateTime.Now.Year)
+            {
+                throw new Exception("The production year cannot be older than the current year.");
+            }
+
+            if (price < 0)
+            {
+                throw new Exception("The price must be greater than zero.");
+            }
+
             Brand = brand;
             Model = model;
             Year = year;
             Color = color;
-            Price= price;   
+            Price = price;
+            Status = status;
             UpdatedAt = DateTime.Now;
         }
 

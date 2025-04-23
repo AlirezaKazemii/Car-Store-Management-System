@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Application.DTOs.User;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.IRepostories;

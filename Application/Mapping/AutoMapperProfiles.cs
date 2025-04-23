@@ -1,7 +1,9 @@
-﻿using Application.DTOs;
+﻿using Application.Commands.Car;
 using Application.DTOs.Car;
 using Application.DTOs.Orders;
+using Application.DTOs.User;
 using AutoMapper;
+using Domain.IRepostories;
 using Domain.Models;
 
 namespace Application.Mapping

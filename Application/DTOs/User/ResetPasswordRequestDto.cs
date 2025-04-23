@@ -5,14 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.DTOs
+namespace Application.DTOs.User
 {
-    public class LoginRequestDto
+    public class ResetPasswordRequestDto
     {
         [Required]
-        public string UserName { get; set; }
+        public string CurrentPassword { get; set; }
 
         [Required]
-        public string Password { get; set; }
+        public string NewPassword { get; set; }
     }
 }

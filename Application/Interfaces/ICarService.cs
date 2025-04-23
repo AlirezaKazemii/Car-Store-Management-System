@@ -1,13 +1,7 @@
 ﻿using Application.Commands.Car;
 using Application.DTOs.Car;
-using Domain.Interfaces;
 using Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Interfaces
 {
