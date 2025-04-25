@@ -24,5 +24,25 @@ namespace Infrastructure.Repositories
         {
             return await _context.Customers.FirstOrDefaultAsync(c => c.UserId == userId);
         }
+
+
+        public async Task Update(Customer customer)
+        {
+            _context.Customers.Update(customer);
+            await _context.SaveChangesAsync();
+        }
+        public async Task<List<Order>> GetOrdersWithCarsByCustomerId(string customerId)
+        {
+            return await _context.Orders
+                .Include(o => o.car)
+                .Where(o => o.CustomerId == customerId)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();  
+        }
+
+        public async Task<Customer?> GetById(string customerId)
+        {
+            return await _context.Customers.FindAsync(customerId);
+        }
     }
 }

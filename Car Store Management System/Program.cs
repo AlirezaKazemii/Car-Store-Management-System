@@ -35,7 +35,7 @@ namespace Car_Store_Management_System
             options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbContext")));
 
             builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));
-            builder.Services.AddScoped<IUserRepository, SQLUserRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<ITokenRepository, SQLTokenRepository>();
             builder.Services.AddScoped<ICarService, CarService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
@@ -44,6 +44,9 @@ namespace Car_Store_Management_System
             builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
             builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
             builder.Services.AddScoped<IImageStorageService, ImageStorateService>();
+            builder.Services.AddScoped<ICustomerService, CustomerService>();
+            builder.Services.AddScoped<IReportReposiroty, ReportRepository>();
+            builder.Services.AddScoped<IReportService, ReportService>();
 
             // افزودن Identity برای مدیریت کاربران و نقش‌ها
             builder.Services.AddIdentity<User, IdentityRole>()

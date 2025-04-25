@@ -16,6 +16,7 @@ namespace Application.Interfaces
         Task<bool> ResetPasswordAsync(string id , string currentPassword, string newPassword);
         Task<bool> ForgotPasswordAsync(string userName, string newPassword, string otpCode);
         Task<User?> FindByIdAsync(string id);
+        Task UpdateUser(User user);
 
     }
 }

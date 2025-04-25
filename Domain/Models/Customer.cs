@@ -22,6 +22,7 @@ namespace Domain.Models
 
         //امتیاز وفاداری یا امتیاز جمع شده
         public int LoyaltyPoints { get; private set; }
+
         public DateTime CreatedAt { get; private set; }
         public DateTime? LastPurchaseDate { get; private set; }
 
@@ -42,6 +43,22 @@ namespace Domain.Models
             LoyaltyPoints = 0;
             Orders = new List<Order>();
             Reviews = new List<Review>();
+        }
+
+        public void UpdateCustomer(string fullName, string email, string phoneNumber, string address)
+        {
+            fullName = fullName;
+            Email = email;
+            PhoneNumber = phoneNumber;
+            Address = address;
+        }
+
+        public void AddLoyaltyPoints(int point)
+        {
+            if (LoyaltyPoints <= 0)
+                throw new ArgumentException("Points must be greater than zero.");
+
+            LoyaltyPoints += point; 
         }
 
 

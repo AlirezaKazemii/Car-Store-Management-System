@@ -76,7 +76,7 @@ namespace Car_Store_Management_System.Controllers
 
 
         [HttpPost("Approve-Payments")]
-        //[Authorize(Roles = "Manager")]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> ApprovePayments(ApprovePaymentsCommand command)
         {
             await _orderService.ApprovePayments(command.OrderId);

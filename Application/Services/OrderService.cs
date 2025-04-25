@@ -19,8 +19,9 @@ namespace Application.Services
         private readonly ICustomerRepository _customerRepository;
         private readonly IMapper _mapper;
         private readonly ITransactionRepository _transactionRepository;
+        private readonly ICustomerService _customerService;
 
-        public OrderService(IOrderRepository orderRepository, ICarRepository carRepository, IUserRepository userRepository, ICustomerRepository customerRepository, IMapper mapper, ITransactionRepository transactionRepository)
+        public OrderService(IOrderRepository orderRepository, ICarRepository carRepository, IUserRepository userRepository, ICustomerRepository customerRepository, IMapper mapper, ITransactionRepository transactionRepository, ICustomerService customerService)
         {
             _orderRepository = orderRepository;
             _carRepository = carRepository;
@@ -28,6 +29,7 @@ namespace Application.Services
             _customerRepository = customerRepository;
             _mapper = mapper;
             _transactionRepository = transactionRepository;
+            _customerService = customerService;
         }
 
 
@@ -186,6 +188,13 @@ namespace Application.Services
             car.ChangeStatus(CarStatus.Sold);
 
             await _carRepository.SaveChangeAsync();
+
+
+            // Add Loyalty Points for customer
+
+            await _customerService.AddLoyaltyPoints(order.CustomerId, order.TotalAmount);
+            var customer = await _customerRepository.GetById(order.CustomerId);
+            await _customerRepository.Update(customer);
         }
 
         public async Task RejectPayments(string orderId)

@@ -1,23 +1,15 @@
 ﻿using Application.Interfaces;
-using Azure.Core;
 using Domain.Models;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
-    public class SQLUserRepository : IUserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly UserManager<User> _userManager;
 
-        public SQLUserRepository(UserManager<User> userManager)
+        public UserRepository(UserManager<User> userManager)
         {
             _userManager = userManager;
         }
@@ -41,12 +33,12 @@ namespace Infrastructure.Repositories
         {
             var userResult = await _userManager.FindByNameAsync(user.UserName);
 
-            if(userResult is null)
+            if (userResult is null)
                 return null;
 
-            var chekPass = await _userManager.CheckPasswordAsync(userResult,password);
+            var chekPass = await _userManager.CheckPasswordAsync(userResult, password);
 
-            if(!chekPass) 
+            if (!chekPass)
                 return null;
 
             return userResult;
@@ -64,7 +56,7 @@ namespace Infrastructure.Repositories
             if (user.Role != null)
                 userResult = await _userManager.AddToRoleAsync(user, user.Role);
 
-            if(!userResult.Succeeded) 
+            if (!userResult.Succeeded)
                 return false;
 
             user.SetCreatedAt(DateTime.Now);
@@ -92,7 +84,7 @@ namespace Infrastructure.Repositories
                 return false;
             }
 
-            
+
             existUser.ClearOtp();
             existUser.SetLastLogin(DateTime.Now);
             await _userManager.UpdateAsync(existUser);
@@ -110,12 +102,12 @@ namespace Infrastructure.Repositories
 
             var checkPassword = await _userManager.CheckPasswordAsync(user, CurrentPassword);
 
-            if(!checkPassword)
+            if (!checkPassword)
                 return false;
 
-            var result = await _userManager.ChangePasswordAsync(user,CurrentPassword,NewPassword);
+            var result = await _userManager.ChangePasswordAsync(user, CurrentPassword, NewPassword);
 
-            if(!result.Succeeded)
+            if (!result.Succeeded)
                 return false;
 
             return true;
@@ -125,15 +117,15 @@ namespace Infrastructure.Repositories
         {
             var user = await _userManager.FindByNameAsync(userName);
 
-            if(user is null)
+            if (user is null)
                 return false;
 
-            if(user.OtpCode != otpCode)
+            if (user.OtpCode != otpCode)
                 return false;
 
             var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-            var resetPassword = await _userManager.ResetPasswordAsync(user,resetToken,newPassword);
+            var resetPassword = await _userManager.ResetPasswordAsync(user, resetToken, newPassword);
 
             return true;
         }
@@ -141,6 +133,11 @@ namespace Infrastructure.Repositories
         public async Task<User?> FindByIdAsync(string id)
         {
             return await _userManager.FindByIdAsync(id);
+        }
+
+        public async Task UpdateUser(User user)
+        {
+            await _userManager.UpdateAsync(user);
         }
     }
 }

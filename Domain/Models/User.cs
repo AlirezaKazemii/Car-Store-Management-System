@@ -39,6 +39,12 @@ namespace Domain.Models
             CreatedAt = DateTime.Now;
         }
 
+        public void UpdateProfile(string email, string phoneNumber)
+        {
+            Email = email;
+            PhoneNumber = phoneNumber;
+        }
+
         public string GenerateOtp()
         {
             OtpCode = new Random().Next(1000, 9999).ToString();
