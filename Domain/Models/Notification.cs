@@ -10,27 +10,27 @@ namespace Domain.Models
     {
         public string Id { get; private set; }
         public string UserId { get; private set; }
-        public string TransactionId { get; set; }
+        public string? TransactionId { get; set; }
 
         public string Message { get; private set; }
         public NotificationType Type { get; private set; }
-        public NotificationStatus Status { get; private set; }
+        public bool IsSent { get; set; }
         public DateTime SentAt { get; private set; }
-
+            
         public User user { get; private set; }
         public AppTransaction Transaction { get; private set; }
 
-        public Notification(string userId,string transactionId ,string message, NotificationType type)
+        public Notification(string userId,string message, NotificationType type)
         {
             Id = Guid.NewGuid().ToString();
             UserId = userId;
-            TransactionId = transactionId;
+            //TransactionId = transactionId;
             Message = message;
             Type = type;
-            Status = NotificationStatus.UnRead;
+            IsSent = false;
             SentAt = DateTime.Now;
         }
-
+           
         public enum NotificationType
         {
             Email,
@@ -38,12 +38,11 @@ namespace Domain.Models
             InApp
         }
 
-        public enum NotificationStatus
+
+        public void MarkAsSent()
         {
-            UnRead,
-            Read,
-            Sent,
-            Faild
+            IsSent = true;  
         }
+
     }
 }

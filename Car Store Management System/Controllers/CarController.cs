@@ -27,25 +27,17 @@ namespace Car_Store_Management_System.Controllers
         [Authorize(Roles = "Manager,Seller")]
         public async Task<IActionResult> Create([FromForm] CreateCarCommand command)
         {
-            // دریافت SellerId از Claims (احراز هویت)
-            var sellerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(sellerId))
-            {
-                throw new UnauthorizedAccessException("Seller must be logged in.");
-            }
-
-            var carId = await _carHandler.CreateCarAsync(command, sellerId);
+            var carId = await _carHandler.CreateCarAsync(command,User);
 
             return Ok("The car was registered.\n\n" + carId);
         }
-
+            
 
         [HttpPut("Update/{id}")]
         [Authorize(Roles = "Manager,Seller")]
-        public async Task<IActionResult> Update(string id, [FromBody] CarUpdateCommand command)
+        public async Task<IActionResult> Update([FromBody] CarUpdateCommand command)
         {
-            var car = await _carHandler.UpdateCarAsync(command,id);
+            var car = await _carHandler.UpdateCarAsync(command);
 
             return Ok("User information updated.\n\n" + car);
         }
@@ -54,15 +46,7 @@ namespace Car_Store_Management_System.Controllers
         [Authorize(Roles = "Seller")]
         public async Task<IActionResult> GetAllForSeller()
         {
-            // دریافت SellerId از Claims (احراز هویت)
-            var sellerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(sellerId))
-            {
-                throw new UnauthorizedAccessException("Seller must be logged in.");
-            }
-
-            var carList = await _carHandler.GetAllForSeller(sellerId);
+            var carList = await _carHandler.GetAllForSeller(User);
             
             return (carList.Count > 0) ? Ok(carList) : BadRequest("No cars found for this user.");
         }
@@ -87,9 +71,9 @@ namespace Car_Store_Management_System.Controllers
 
         [HttpGet("GetById")]
         [Authorize(Roles = "Manager,Buyer,Seller")]
-        public async Task<IActionResult> GetById(string carId)
+        public async Task<IActionResult> GetById([FromQuery] GetCarByIdCommand command)
         {
-            var carResult = await _carHandler.GetByIdAsync(carId, User);
+            var carResult = await _carHandler.GetByIdAsync(command, User);
 
             if(carResult is null)
                 return NotFound();
@@ -100,14 +84,16 @@ namespace Car_Store_Management_System.Controllers
             return Ok(carResult);
         }
 
+
         [HttpDelete("Delete")]
         [Authorize(Roles = "Manager")]
-        public async Task<IActionResult> Delete(string carId)
+        public async Task<IActionResult> Delete(DeleteCarByIdCommand command)
         {
-            await _carHandler.DeleteAsync(carId);
+            await _carHandler.DeleteAsync(command);
 
             return Ok("The car was successfully deleted.");
         }
+
 
         [HttpPut("ChangeCarStatus")]
         [Authorize(Roles = "Manager,Seller")]
@@ -117,6 +103,7 @@ namespace Car_Store_Management_System.Controllers
 
             return result ? Ok("Car status changed.") : BadRequest("Car not found!");
         }
+
 
         [HttpGet("SearchCars")]
         [Authorize(Roles = "Manager,Buyer,Seller")]

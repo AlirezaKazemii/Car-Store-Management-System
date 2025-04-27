@@ -1,4 +1,5 @@
 ﻿using Application.Commands.Car;
+using Application.Commands.Notification;
 using Application.DTOs.Car;
 using Application.Interfaces;
 using AutoMapper;
@@ -6,6 +7,7 @@ using Domain.Interfaces;
 using Domain.IRepostories;
 using Domain.Models;
 using System.Security.Claims;
+using static Domain.Models.Notification;
 
 namespace Application.CommandHandlers
 {
@@ -14,16 +16,28 @@ namespace Application.CommandHandlers
         private readonly ICarRepository _carRepository;
         private readonly IImageStorageService _imageStorage;
         private readonly IMapper _mapper;
+        private readonly INotificationService _notificationService;
+        private readonly IUserRepository _userRepository;
 
-        public CarService(ICarRepository carRepository, IImageStorageService imageStorage, IMapper mapper)
+        public CarService(ICarRepository carRepository, IImageStorageService imageStorage, IMapper mapper, INotificationService notificationService, IUserRepository userRepository)
         {
             _carRepository = carRepository;
             _imageStorage = imageStorage;
             _mapper = mapper;
+            _notificationService = notificationService;
+            _userRepository = userRepository;
         }
 
-        public async Task<string> CreateCarAsync(CreateCarCommand command, string sellerId)
+        public async Task<string> CreateCarAsync(CreateCarCommand command, ClaimsPrincipal user)
         {
+
+            var sellerId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(sellerId))
+            {
+                throw new UnauthorizedAccessException("Seller must be logged in.");
+            }
+
             var car = new Car(command.Brand, command.Model, command.Year, command.Color, command.Price, command.VIN, command.Status, sellerId);
 
             if (command.Images != null)
@@ -38,12 +52,36 @@ namespace Application.CommandHandlers
 
             await _carRepository.CreateCarAsync(car);
 
+            // Send Notification
+
+            var customerNotif = new CreateNotificationCommand()
+            {
+                UserId = sellerId,
+                Message = "The car was registered.",
+                Type = NotificationType.Email
+            };
+
+            await _notificationService.CreateNotification(customerNotif);
+
+            var managerIds = await _userRepository.GetAdminUserIdsAsync();
+            
+            foreach(var managerId in managerIds)
+            {
+                var managerNotif = new CreateNotificationCommand()
+                {
+                    UserId = managerId,
+                    Message = "A new car was registered in the store.",
+                    Type = NotificationType.Email
+                };
+                await _notificationService.CreateNotification(managerNotif);
+            }
+
             return car.Id;
         }
 
-        public async Task<Car> UpdateCarAsync(CarUpdateCommand command, string carId)
+        public async Task<Car> UpdateCarAsync(CarUpdateCommand command)
         {
-            var car = await _carRepository.FindByIdAsync(carId);
+            var car = await _carRepository.FindByIdAsync(command.CarId);
 
             if (car is null)
                 throw new Exception("The desired car was not found.");
@@ -55,8 +93,15 @@ namespace Application.CommandHandlers
             return car;
         }
 
-        public async Task<List<GetAllForSellerDto>> GetAllForSeller(string sellerId)
+        public async Task<List<GetAllForSellerDto>> GetAllForSeller(ClaimsPrincipal user)
         {
+            var sellerId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(sellerId))
+            {
+                throw new UnauthorizedAccessException("Seller must be logged in.");
+            }
+
             var carList = await _carRepository.GetAllForSerller(sellerId);
 
             if (carList is null)
@@ -79,10 +124,9 @@ namespace Application.CommandHandlers
             return carListDto;
         }
 
-        public async Task<object?> GetByIdAsync(string carId, ClaimsPrincipal user)
+        public async Task<object?> GetByIdAsync(GetCarByIdCommand command, ClaimsPrincipal user)
         {
-
-            var car = await _carRepository.FindByIdAsync(carId);
+            var car = await _carRepository.FindByIdAsync(command.CarId);
 
             if (car is null)
                 return null;
@@ -110,9 +154,9 @@ namespace Application.CommandHandlers
             return carDto;
         }
 
-        public async Task DeleteAsync(string carId)
+        public async Task DeleteAsync(DeleteCarByIdCommand command)
         {
-            var car = await _carRepository.FindByIdAsync(carId);
+            var car = await _carRepository.FindByIdAsync(command.CarId);
 
             if (car is null)
                 throw new Exception("User not found!");

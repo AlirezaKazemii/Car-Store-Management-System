@@ -47,6 +47,8 @@ namespace Car_Store_Management_System
             builder.Services.AddScoped<ICustomerService, CustomerService>();
             builder.Services.AddScoped<IReportReposiroty, ReportRepository>();
             builder.Services.AddScoped<IReportService, ReportService>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
             // افزودن Identity برای مدیریت کاربران و نقش‌ها
             builder.Services.AddIdentity<User, IdentityRole>()

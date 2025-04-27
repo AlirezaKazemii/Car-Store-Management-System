@@ -7,12 +7,12 @@ namespace Application.Interfaces
 {
     public interface ICarService
     {
-        Task<string> CreateCarAsync(CreateCarCommand command, string sellerId);
-        Task<Car> UpdateCarAsync(CarUpdateCommand command, string carId);
-        Task<List<GetAllForSellerDto>> GetAllForSeller(string sellerId);
+        Task<string> CreateCarAsync(CreateCarCommand command, ClaimsPrincipal user);
+        Task<Car> UpdateCarAsync(CarUpdateCommand command);
+        Task<List<GetAllForSellerDto>> GetAllForSeller(ClaimsPrincipal user);
         Task<List<GetAllForManagerDto>> GetAllForManager();
-        Task<object?> GetByIdAsync(string carId, ClaimsPrincipal user);
-        Task DeleteAsync(string carId);
+        Task<object?> GetByIdAsync(GetCarByIdCommand command, ClaimsPrincipal user);
+        Task DeleteAsync(DeleteCarByIdCommand command);
         Task<bool> ChangeCarStatusAsync(ChangeCarStatusCommand command);
         Task<PagedResultDto<CarSearchFilterDto>> SearchCarsAsync(CarSearchFilterCommand command, ClaimsPrincipal user);
 

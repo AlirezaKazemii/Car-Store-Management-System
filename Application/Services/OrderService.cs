@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Orders;
+﻿using Application.Commands.Notification;
+using Application.DTOs.Orders;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Interfaces;
@@ -7,6 +8,7 @@ using Domain.Models;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 using static Domain.Models.Car;
+using static Domain.Models.Notification;
 using static Domain.Models.Order;
 
 namespace Application.Services
@@ -20,8 +22,9 @@ namespace Application.Services
         private readonly IMapper _mapper;
         private readonly ITransactionRepository _transactionRepository;
         private readonly ICustomerService _customerService;
+        private readonly INotificationService _notificationService;
 
-        public OrderService(IOrderRepository orderRepository, ICarRepository carRepository, IUserRepository userRepository, ICustomerRepository customerRepository, IMapper mapper, ITransactionRepository transactionRepository, ICustomerService customerService)
+        public OrderService(IOrderRepository orderRepository, ICarRepository carRepository, IUserRepository userRepository, ICustomerRepository customerRepository, IMapper mapper, ITransactionRepository transactionRepository, ICustomerService customerService, INotificationService notificationService)
         {
             _orderRepository = orderRepository;
             _carRepository = carRepository;
@@ -30,6 +33,7 @@ namespace Application.Services
             _mapper = mapper;
             _transactionRepository = transactionRepository;
             _customerService = customerService;
+            _notificationService = notificationService;
         }
 
 
@@ -57,17 +61,41 @@ namespace Application.Services
             // Car
             var existCar = await _carRepository.FindByIdAsync(carId);
 
-            if (existCar is null) 
+            if (existCar is null)
                 throw new Exception("Car is not found!");
 
             if (existCar.Status == CarStatus.Sold)
                 throw new Exception("This car has already been sold.");
 
 
-            var order = new Order(existCar.Id, existUser.Id, existCustomer.Id,existCar.Price);
+            var order = new Order(existCar.Id, existUser.Id, existCustomer.Id, existCar.Price);
 
 
             await _orderRepository.Add(order);
+
+            // Send Notification
+
+            var buyerNotif = new CreateNotificationCommand()
+            {
+                UserId = userId,
+                Message = "Your order has been successfully placed and is being reviewed.",
+                Type = NotificationType.Email
+            };
+
+            await _notificationService.CreateNotification(buyerNotif);
+
+            var managerIds = await _userRepository.GetAdminUserIdsAsync();
+
+            foreach (var id in managerIds)
+            {
+                var managerNotif = new CreateNotificationCommand()
+                {
+                    UserId = id,
+                    Message = "A new order was placed by the customer.",
+                    Type = NotificationType.Email
+                };
+                await _notificationService.CreateNotification(managerNotif);
+            }
         }
 
         public async Task ApproveOrders(string orderId)
@@ -85,6 +113,17 @@ namespace Application.Services
             order.UpdateStatus(OrderStatus.AwaitingPayment);
 
             _orderRepository.SaveChange();
+
+            // Send Notification
+
+            var customerNotif = new CreateNotificationCommand()
+            {
+                UserId = order.UserId,
+                Message = "Your order has been confirmed by the store! It is being prepared.",
+                Type = NotificationType.SMS
+            };
+
+            await _notificationService.CreateNotification(customerNotif);
         }
 
         public async Task RejectOrders(string orderId)
@@ -97,6 +136,17 @@ namespace Application.Services
             order.UpdateStatus(OrderStatus.Rejected);
 
             await _orderRepository.SaveChange();
+
+            // Send Notification
+
+            var customerNotif = new CreateNotificationCommand()
+            {
+                UserId = order.UserId,
+                Message = "Your order was rejected by the store!",
+                Type = NotificationType.SMS
+            };
+
+            await _notificationService.CreateNotification(customerNotif);
         }
 
         public async Task<List<GetAllPendingOrdersDto>> GetAllPendingOrders()
@@ -195,6 +245,16 @@ namespace Application.Services
             await _customerService.AddLoyaltyPoints(order.CustomerId, order.TotalAmount);
             var customer = await _customerRepository.GetById(order.CustomerId);
             await _customerRepository.Update(customer);
+
+            // Send Notification
+            var customerNotif = new CreateNotificationCommand()
+            {
+                UserId = order.UserId,
+                Message = "Your payment receipt has been approved by the store manager.",
+                Type = NotificationType.Email
+            };
+
+            await _notificationService.CreateNotification(customerNotif);
         }
 
         public async Task RejectPayments(string orderId)
@@ -210,6 +270,16 @@ namespace Application.Services
             order.UpdateStatus(OrderStatus.Rejected);
 
             await _orderRepository.SaveChange();
+
+            // Send Notification 
+            var customerNotif = new CreateNotificationCommand()
+            {
+                UserId = order.UserId,
+                Message = "Your payment receipt was rejected by the store manager.",
+                Type = NotificationType.Email
+            };
+
+            await _notificationService.CreateNotification(customerNotif);
         }
 
         public async Task<InvoiceDto> GenerateInvoiceFromOrder(string orderId)
@@ -234,9 +304,20 @@ namespace Application.Services
                 OrderID = order.Id
             };
 
+            // Send Notification
+
+            var customerNotif = new CreateNotificationCommand()
+            {
+                UserId = order.UserId,
+                Message = "Your order invoice has been issued.",
+                Type = NotificationType.Email
+            };
+
+            await _notificationService.CreateNotification(customerNotif);
+
             return invoiceDto;
         }
-
+         
         public async Task<List<GetUserOrdersDto>> GetUserOrders(string userId)
         {
             var orderList = await _orderRepository.GetOrdersByUserId(userId);
@@ -289,5 +370,8 @@ namespace Application.Services
 
             return orderListDto;
         }
+
+
+
     }
 }

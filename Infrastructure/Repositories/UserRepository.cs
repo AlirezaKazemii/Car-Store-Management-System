@@ -139,5 +139,10 @@ namespace Infrastructure.Repositories
         {
             await _userManager.UpdateAsync(user);
         }
+
+        public async Task<List<string>> GetAdminUserIdsAsync()
+        {
+            return await _userManager.Users.Where(u => u.Role == "Manager").Select(u => u.Id).ToListAsync();
+        }
     }
 }
