@@ -22,21 +22,6 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("CarCategory", b =>
-                {
-                    b.Property<string>("CarCategoriesId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("CarsId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("CarCategoriesId", "CarsId");
-
-                    b.HasIndex("CarsId");
-
-                    b.ToTable("CarCategory");
-                });
-
             modelBuilder.Entity("Domain.Models.AppTransaction", b =>
                 {
                     b.Property<string>("Id")
@@ -141,23 +126,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("CarId");
 
                     b.ToTable("CarImage");
-                });
-
-            modelBuilder.Entity("Domain.Models.Category", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Domain.Models.Customer", b =>
@@ -284,44 +252,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("Domain.Models.Review", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("CarId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CustomerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CarId");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Reviews");
-                });
-
             modelBuilder.Entity("Domain.Models.User", b =>
                 {
                     b.Property<string>("Id")
@@ -382,6 +312,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("SoftDelete")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -559,21 +492,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("CarCategory", b =>
-                {
-                    b.HasOne("Domain.Models.Category", null)
-                        .WithMany()
-                        .HasForeignKey("CarCategoriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.Car", null)
-                        .WithMany()
-                        .HasForeignKey("CarsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Domain.Models.AppTransaction", b =>
                 {
                     b.HasOne("Domain.Models.Order", "Order")
@@ -662,33 +580,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("car");
                 });
 
-            modelBuilder.Entity("Domain.Models.Review", b =>
-                {
-                    b.HasOne("Domain.Models.Car", "Car")
-                        .WithMany("Reviews")
-                        .HasForeignKey("CarId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.Customer", "Customer")
-                        .WithMany("Reviews")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.User", "User")
-                        .WithMany("Reviews")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Car");
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -751,15 +642,11 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("Order")
                         .IsRequired();
-
-                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Domain.Models.Customer", b =>
                 {
                     b.Navigation("Orders");
-
-                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Domain.Models.Order", b =>
@@ -778,8 +665,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Notifications");
 
                     b.Navigation("Orders");
-
-                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }

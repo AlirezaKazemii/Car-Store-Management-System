@@ -1,5 +1,6 @@
 ﻿using Application.Commands.Report;
 using Application.Interfaces;
+using Application.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,13 +27,13 @@ namespace Car_Store_Management_System.Controllers
             if (result.Count == 0)
                 return NotFound("No sales have been made on this date.");
 
-            return Ok(result);
+            return Ok(new Result("", result));
         }
 
 
 
         [HttpGet("top-selling-car")]
-        //[Authorize(Roles = "Manager")]
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> GetTopSellingCars([FromQuery] GetTopSellingCarsCommand command)
         {
             var result = await _reportService.GetTopSellingCar(command);
@@ -40,7 +41,7 @@ namespace Car_Store_Management_System.Controllers
             if (result.Count == 0)
                 return NotFound("No sales have been made on this date.");
 
-            return Ok(result);
+            return Ok(new Result("", result));
         }
 
 
@@ -57,7 +58,7 @@ namespace Car_Store_Management_System.Controllers
         {
             var result = await _reportService.GetCustomerBehavior(customerId);
 
-            return Ok(result);
+            return Ok(new Result("", result));
         }
 
 

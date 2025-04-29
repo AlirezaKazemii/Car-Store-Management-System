@@ -1,11 +1,8 @@
-﻿using Application.DTOs.User;
+﻿using Application.Commands.User;
 using Application.Interfaces;
-using AutoMapper;
-using Domain.IRepostories;
-using Domain.Models;
+using Application.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Car_Store_Management_System.Controllers
 {
@@ -13,124 +10,102 @@ namespace Car_Store_Management_System.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IMapper _autoMapper;
-        private readonly IUserRepository _userRepository;
-        private readonly ITokenRepository _tokenRepository;
-        private readonly ICustomerRepository _customerRepository;
+        private readonly IUserService _userService;
 
-        public UserController(IMapper mapper, IUserRepository userRepository, ITokenRepository tokenRepository,ICustomerRepository customerRepository)
+        public UserController(IUserService userService)
         {
-            _autoMapper = mapper;
-            _userRepository = userRepository;
-            _tokenRepository = tokenRepository;
-            _customerRepository = customerRepository;
+            _userService = userService;
         }
 
 
         [HttpPost]
         [Route("Register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequestDto registerRequestDto)
+        [AllowAnonymous]
+        public async Task<IActionResult> Register([FromBody] RegisterUserCommand Command)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            // Map Dto to Model
-            var user = _autoMapper.Map<User>(registerRequestDto);
-
-            var result = await _userRepository.RegisterAsync(user, registerRequestDto.Password);
-
-            if (!result)
-                return BadRequest("Invalid Input");
-
-            if(user.Role == "Buyer")
-            {
-                var customer = new Customer(user.Id, user.UserName, user.Email, user.PhoneNumber, "");
-                _customerRepository.Add(customer);
-            }
-
-            return Ok("User added successfully");
+            await _userService.Register(Command);
+            return Ok(new Result("User added successfully"));
         }
+
 
         [HttpPost]
         [Route("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequestDto, string otpCode)
+        [AllowAnonymous]
+        public async Task<IActionResult> Login([FromBody] LoginUserCommand command, string otpCode)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var user = _autoMapper.Map<User>(loginRequestDto);
-
-            var userResult = await _userRepository.LoginAsync(user, loginRequestDto.Password);
-
-            if (userResult is null)
-                return NotFound("User not found Or Password is incorrect!");
-
-            var Otp = await _userRepository.VerifyOtpCode(user, otpCode);
-
-            if (!Otp)
-                return BadRequest("The Otp code entered is incorrect OR expired Otp code");
-
-            var jwtToken = _tokenRepository.CreateJwtToken(userResult);
-
-            return Ok(jwtToken);
-
+            var result = await _userService.Login(command, otpCode);
+            return Ok(new Result("Your login was successful.", result));
         }
+
 
         [HttpPost]
         [Route("SendOtp")]
-        public async Task<IActionResult> SendOtp([FromBody] OtpRequestDto otpRequestDto)
+        [AllowAnonymous]
+        public async Task<IActionResult> SendOtp([FromBody] OtpCodeCommand command)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var otpCode = await _userRepository.SendOtpCode(otpRequestDto.PhoneNumber);
-
-            if (otpCode is null)
-                return NotFound("User not found!");
-
-            return Ok(otpCode);
+            var result = await _userService.SendOtp(command);
+            return Ok(new Result("Otp Code: ",result));
         }
 
-        [Authorize(Roles = "Buyer,Seller,Manager")]
+
         [HttpPut]
         [Route("ResetPassword")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
+        [Authorize(Roles = "Buyer,Seller,Manager")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized("User identity not found.");
-
-            var Result = await _userRepository.ResetPasswordAsync(userId, request.CurrentPassword, request.NewPassword);
-
-            if (!Result)
-                return BadRequest("User is not found OR New password is incorrect.");
-
-            return Ok("Password updated.");
+            await _userService.ResetPassword(command, User);
+            return Ok(new Result("Password updated."));
         }
+
 
         [HttpPut]
         [Route("ForgotPassword")]
+        [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword
-            ([FromBody] ForgotPasswrodRequestDto request, string otpCode)
+            ([FromBody] ForgotPasswrodCommand command, string otpCode)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var userResult = await _userRepository.ForgotPasswordAsync(request.UserName, request.NewPassword, otpCode);
-
-            return userResult ?
-                Ok("Password updated.") :
-                BadRequest("invalid input (user is not found or otp code is incorrect");
-            //if (!userResult) ;
-            //    return BadRequest("invalid input (user is not found or otp code is incorrect");
-
-            //return Ok("Password updated.");
+            await _userService.ForgotPassword(command, otpCode);
+            return Ok(new Result("Password updated."));
         }
 
+
+        [HttpPut]
+        [Route("Edit-Informations")]
+        [Authorize(Roles = "Buyer,Seller,Manager")]
+        public async Task<IActionResult> Update(UpdateUserInfoCommand command)
+        {
+            await _userService.UpdateUserInfo(command, User);
+            return Ok(new Result("User profile updated successfully."));
+        }
+
+
+        [HttpDelete]
+        [Route("Soft-Delete")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> SoftDelete([FromQuery] SoftDeleteCommand command)
+        {
+            await _userService.SoftDelete(command);
+            return Ok(new Result("User successfully deleted."));
+        }
+
+
+        [HttpGet]
+        [Route("GetUser-ById")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> GetById([FromQuery] GetUserByIdCommand command)
+        {
+            var result = await _userService.GetById(command);
+            return Ok(new Result("User information: ", result));
+        }
+
+        [HttpGet]
+        [Route("Get-All_Users")]
+        [Authorize(Roles = "Manager")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var result = await _userService.GetAllUsers();
+            return Ok(new Result("List of users: ", result));
+        }
 
     }
 }

@@ -1,12 +1,10 @@
-﻿using Application.CommandHandlers;
-using Application.Commands.Car;
+﻿using Application.Commands.Car;
+using Application.Commands.User;
 using Application.Interfaces;
+using Application.Shared;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration.UserSecrets;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Claims;
 
 namespace Car_Store_Management_System.Controllers
 {
@@ -27,11 +25,11 @@ namespace Car_Store_Management_System.Controllers
         [Authorize(Roles = "Manager,Seller")]
         public async Task<IActionResult> Create([FromForm] CreateCarCommand command)
         {
-            var carId = await _carHandler.CreateCarAsync(command,User);
+            var carId = await _carHandler.CreateCarAsync(command, User);
 
-            return Ok("The car was registered.\n\n" + carId);
+            return Ok(new Result("The car was registered.",carId));
         }
-            
+
 
         [HttpPut("Update/{id}")]
         [Authorize(Roles = "Manager,Seller")]
@@ -39,17 +37,19 @@ namespace Car_Store_Management_System.Controllers
         {
             var car = await _carHandler.UpdateCarAsync(command);
 
-            return Ok("User information updated.\n\n" + car);
+            return Ok(new Result("User information updated.",car));
         }
+
 
         [HttpGet("GetAllForSeller")]
         [Authorize(Roles = "Seller")]
         public async Task<IActionResult> GetAllForSeller()
         {
             var carList = await _carHandler.GetAllForSeller(User);
-            
-            return (carList.Count > 0) ? Ok(carList) : BadRequest("No cars found for this user.");
+
+            return (carList.Count > 0) ? Ok(new Result("Car List: ",carList)) : BadRequest("No cars found for this user.");
         }
+
 
         [HttpGet]
         [Route("GetAllForManager")]
@@ -58,8 +58,9 @@ namespace Car_Store_Management_System.Controllers
         {
             var carList = await _carHandler.GetAllForManager();
 
-            return (carList.Count > 0) ? Ok(carList) : BadRequest("No car found!");
+            return (carList.Count > 0) ? Ok(new Result("Car List: ",carList)) : BadRequest("No car found!");
         }
+
 
         //[HttpGet]
         //[Route("GetAllForBuyer")]
@@ -69,19 +70,20 @@ namespace Car_Store_Management_System.Controllers
 
         //}
 
+
         [HttpGet("GetById")]
         [Authorize(Roles = "Manager,Buyer,Seller")]
         public async Task<IActionResult> GetById([FromQuery] GetCarByIdCommand command)
         {
             var carResult = await _carHandler.GetByIdAsync(command, User);
 
-            if(carResult is null)
+            if (carResult is null)
                 return NotFound();
 
-            if(carResult == "Forbidden")
+            if (carResult == "Forbidden")
                 return Forbid();
 
-            return Ok(carResult);
+            return Ok(new Result("Car Information: ",carResult));
         }
 
 
@@ -91,7 +93,7 @@ namespace Car_Store_Management_System.Controllers
         {
             await _carHandler.DeleteAsync(command);
 
-            return Ok("The car was successfully deleted.");
+            return Ok(new Result("The car was successfully deleted."));
         }
 
 
@@ -101,7 +103,7 @@ namespace Car_Store_Management_System.Controllers
         {
             var result = await _carHandler.ChangeCarStatusAsync(command);
 
-            return result ? Ok("Car status changed.") : BadRequest("Car not found!");
+            return result ? Ok(new Result("Car status changed.")) : BadRequest("Car not found!");
         }
 
 
@@ -109,11 +111,10 @@ namespace Car_Store_Management_System.Controllers
         [Authorize(Roles = "Manager,Buyer,Seller")]
         public async Task<IActionResult> SearchCars([FromQuery] CarSearchFilterCommand command)
         {
-            var result = await _carHandler.SearchCarsAsync(command,User);
+            var result = await _carHandler.SearchCarsAsync(command, User);
 
-            return Ok(result);
+            return Ok(new Result("",result));
         }
 
     }
 }
-    

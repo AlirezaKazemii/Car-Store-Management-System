@@ -1,5 +1,6 @@
 ﻿using Application.Commands.Notification;
 using Application.Interfaces;
+using Application.Shared;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Car_Store_Management_System.Controllers
@@ -20,14 +21,14 @@ namespace Car_Store_Management_System.Controllers
         public async Task<IActionResult> CreateNotification([FromBody] CreateNotificationCommand command)
         {
             await _notificationService.CreateNotification(command);
-            return Ok("Notification created successfully.");
+            return Ok(new Result("Notification created successfully."));
         }
 
         [HttpGet("Send-Notification")]
         public async Task<IActionResult> SendAllNotifications()
         {
             await _notificationService.SendAllUnsentNotifications();
-            return Ok("All unsent notifications have been sent.");
+            return Ok(new Result("All unsent notifications have been sent."));
         }
 
     }

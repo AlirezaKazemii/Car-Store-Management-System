@@ -16,11 +16,9 @@ namespace Infrastructure.Data
         }
 
         public DbSet<Car> Cars { get; set; }
-        public DbSet<Category> Categories { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Order> Orders { get; set; }
-        public DbSet<Review> Reviews { get; set; }
         public DbSet<AppTransaction> Transactions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -79,31 +77,12 @@ namespace Infrastructure.Data
                 .WithMany(u => u.Notifications)
                 .HasForeignKey(n => n.UserId);
 
-            // User and Review (1:many)
-            builder.Entity<Review>()
-                .HasOne(r => r.User)
-                .WithMany(u => u.Reviews)
-                .HasForeignKey(r => r.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             // Car and CarImage (1:many)
             builder.Entity<CarImage>()
                 .HasOne(i => i.Car)
                 .WithMany(c => c.Images)
                 .HasForeignKey(i => i.CarId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            // Car and Review (1:many)
-            builder.Entity<Review>()
-                .HasOne(r => r.Car)
-                .WithMany(c => c.Reviews)
-                .HasForeignKey(r => r.CarId)
-                .OnDelete(DeleteBehavior.Restrict);                 
-
-            // Car and Category (many:many)
-            builder.Entity<Car>()
-                .HasMany(c => c.CarCategories)
-                .WithMany(cat => cat.Cars);
+                .OnDelete(DeleteBehavior.Restrict);             
 
             // Order and Customer (1:many)
             builder.Entity<Order>()

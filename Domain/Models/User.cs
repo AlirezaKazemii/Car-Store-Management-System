@@ -1,10 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.Models
 {
@@ -17,11 +11,11 @@ namespace Domain.Models
         public DateTime? OtpGeneratedAt { get; private set; }
 
 
-        public Customer Customer { get; set; } // اگر مشتری باشه 
-        public ICollection<Order> Orders { get; set; }
-        public ICollection<Car> Cars { get; set; } // اگر فروشنده باشه 
-        public ICollection<Notification> Notifications { get; set; }
-        public ICollection<Review> Reviews { get; private set; }
+        public Customer Customer { get; private set; } // اگر مشتری باشه 
+        public ICollection<Order> Orders { get; private set; }
+        public ICollection<Car> Cars { get; private set; } // اگر فروشنده باشه 
+        public ICollection<Notification> Notifications { get; private set; }
+        public bool SoftDelete { get; private set; }
 
 
         public User()
@@ -50,6 +44,11 @@ namespace Domain.Models
             OtpCode = new Random().Next(1000, 9999).ToString();
             OtpGeneratedAt = DateTime.Now;
             return OtpCode;
+        }
+
+        public void SoftDeleteMethod()
+        {
+            SoftDelete = true;
         }
 
         // expired

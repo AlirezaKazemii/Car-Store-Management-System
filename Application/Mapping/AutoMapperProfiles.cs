@@ -1,4 +1,5 @@
 ﻿using Application.Commands.Car;
+using Application.Commands.User;
 using Application.DTOs.Car;
 using Application.DTOs.Orders;
 using Application.DTOs.User;
@@ -12,8 +13,9 @@ namespace Application.Mapping
     {
         public AutoMapperProfiles()
         {
-            CreateMap<User, RegisterRequestDto>().ReverseMap();
-            CreateMap<User, LoginRequestDto>().ReverseMap();
+            CreateMap<User, RegisterUserCommand>().ReverseMap();
+            CreateMap<User, GetUserByIdDto>().ReverseMap();
+            CreateMap<User, LoginUserCommand>().ReverseMap();
 
             CreateMap<Car, GetAllForSellerDto>()
                 .ForMember(dest => dest.Images,

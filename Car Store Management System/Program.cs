@@ -1,20 +1,22 @@
 ﻿
+using Application.CommandHandlers;
+using Application.Commands.User;
+using Application.Fluent_Validation.User;
+using Application.Interfaces;
+using Application.Mapping;
+using Application.Services;
+using Domain.Interfaces;
+using Domain.IRepostories;
+using Domain.Models;
+using FluentValidation.AspNetCore;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Domain.Models;
-using Application.Mapping;
-using Application.Interfaces;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.OpenApi.Models;
-using DevDefined.OAuth.Storage.Basic;
-using Domain.Interfaces;
-using Application.CommandHandlers;
-using Application.Services;
-using Domain.IRepostories;
+using System.Text;
 
 namespace Car_Store_Management_System
 {
@@ -26,7 +28,16 @@ namespace Car_Store_Management_System
 
             // Add services to the container.
 
-            builder.Services.AddControllers();
+            //builder.Services.AddControllers();
+
+            builder.Services.AddControllers()
+                 .AddFluentValidation(fv =>
+                 {
+                     fv.RegisterValidatorsFromAssemblyContaining<RegisterUserCommandValidator>();
+
+                 });
+
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -49,6 +60,9 @@ namespace Car_Store_Management_System
             builder.Services.AddScoped<IReportService, ReportService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+            builder.Services.AddScoped<IUserService, UserService>();
+
+
 
             // افزودن Identity برای مدیریت کاربران و نقش‌ها
             builder.Services.AddIdentity<User, IdentityRole>()

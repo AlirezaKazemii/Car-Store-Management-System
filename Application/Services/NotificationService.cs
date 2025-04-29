@@ -3,6 +3,7 @@ using Application.Commands.Notification;
 using Application.Interfaces;
 using Domain.IRepostories;
 using Domain.Models;
+using FluentValidation;
 using static Domain.Models.Notification;
 
 namespace Application.Services
@@ -10,15 +11,24 @@ namespace Application.Services
     public class NotificationService : INotificationService
     {
         private readonly INotificationRepository _notificationRepository;
+        private readonly IValidator<CreateNotificationCommand> _createNotificationValidator;
 
-        public NotificationService(INotificationRepository notificationRepository)
+        public NotificationService(INotificationRepository notificationRepository,
+            IValidator<CreateNotificationCommand> CreateNotificationValidator)
         {
             _notificationRepository = notificationRepository;
+            _createNotificationValidator = CreateNotificationValidator;
         }
 
 
         public async Task CreateNotification(CreateNotificationCommand command)
         {
+
+            var validationResult = await _createNotificationValidator.ValidateAsync(command);
+
+            if(!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
             var notification = new Notification(command.UserId, command.Message, command.Type);
 
             await _notificationRepository.Add(notification);

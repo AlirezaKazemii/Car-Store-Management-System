@@ -6,6 +6,7 @@ using AutoMapper;
 using Domain.Interfaces;
 using Domain.IRepostories;
 using Domain.Models;
+using FluentValidation;
 using System.Security.Claims;
 using static Domain.Models.Notification;
 
@@ -18,18 +19,42 @@ namespace Application.CommandHandlers
         private readonly IMapper _mapper;
         private readonly INotificationService _notificationService;
         private readonly IUserRepository _userRepository;
+        private readonly IValidator<CreateCarCommand> _createCarValidator;
+        private readonly IValidator<CarUpdateCommand> _updateCarValidator;
+        private readonly IValidator<GetCarByIdCommand> _getCarByIdValidator;
+        private readonly IValidator<DeleteCarByIdCommand> _deleteCarByIdValidator;
+        private readonly IValidator<ChangeCarStatusCommand> _changeCarStatusValidator;
 
-        public CarService(ICarRepository carRepository, IImageStorageService imageStorage, IMapper mapper, INotificationService notificationService, IUserRepository userRepository)
+        public CarService(ICarRepository carRepository,
+            IImageStorageService imageStorage,
+            IMapper mapper,
+            INotificationService notificationService,
+            IUserRepository userRepository,
+            IValidator<CreateCarCommand> CreateCarValidator,
+            IValidator<CarUpdateCommand> UpdateCarValidator,
+            IValidator<GetCarByIdCommand> GetCarByIdValidator,
+            IValidator<DeleteCarByIdCommand> DeleteCarByIdValidator,
+            IValidator<ChangeCarStatusCommand> ChangeCarStatusValidator)
         {
             _carRepository = carRepository;
             _imageStorage = imageStorage;
             _mapper = mapper;
             _notificationService = notificationService;
             _userRepository = userRepository;
+            _createCarValidator = CreateCarValidator;
+            _updateCarValidator = UpdateCarValidator;
+            _getCarByIdValidator = GetCarByIdValidator;
+            _deleteCarByIdValidator = DeleteCarByIdValidator;
+            _changeCarStatusValidator = ChangeCarStatusValidator;
         }
 
         public async Task<string> CreateCarAsync(CreateCarCommand command, ClaimsPrincipal user)
         {
+
+            var validationResult = await _createCarValidator.ValidateAsync(command);
+
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
 
             var sellerId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -81,6 +106,12 @@ namespace Application.CommandHandlers
 
         public async Task<Car> UpdateCarAsync(CarUpdateCommand command)
         {
+
+            var validationResult = await _updateCarValidator.ValidateAsync(command);
+
+            if(!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
             var car = await _carRepository.FindByIdAsync(command.CarId);
 
             if (car is null)
@@ -126,6 +157,12 @@ namespace Application.CommandHandlers
 
         public async Task<object?> GetByIdAsync(GetCarByIdCommand command, ClaimsPrincipal user)
         {
+
+            var validationResult = await _getCarByIdValidator.ValidateAsync(command);
+
+            if (validationResult is null)
+                throw new ValidationException(validationResult.Errors);
+
             var car = await _carRepository.FindByIdAsync(command.CarId);
 
             if (car is null)
@@ -156,6 +193,12 @@ namespace Application.CommandHandlers
 
         public async Task DeleteAsync(DeleteCarByIdCommand command)
         {
+
+            var validationResult = await _deleteCarByIdValidator.ValidateAsync(command);
+
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
             var car = await _carRepository.FindByIdAsync(command.CarId);
 
             if (car is null)
@@ -171,6 +214,12 @@ namespace Application.CommandHandlers
 
         public async Task<bool> ChangeCarStatusAsync(ChangeCarStatusCommand command)
         {
+
+            var validationResult = await _changeCarStatusValidator.ValidateAsync(command);
+
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
             var car = await _carRepository.FindByIdAsync(command.CarId);
 
             if (car is null)

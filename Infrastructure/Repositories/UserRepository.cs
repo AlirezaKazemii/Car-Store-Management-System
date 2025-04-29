@@ -14,24 +14,14 @@ namespace Infrastructure.Repositories
             _userManager = userManager;
         }
 
-        public async Task<string> SendOtpCode(string phoneNumber)
+        public async Task<User> SendOtpCode(string phoneNumber)
         {
-            var existUser = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber);
-
-            if (existUser is null)
-                return null;
-
-            var otpCode = existUser.GenerateOtp();
-
-            await _userManager.UpdateAsync(existUser);
-
-            return otpCode;
-
+            return await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber);
         }
 
         public async Task<User> LoginAsync(User user, string password)
         {
-            var userResult = await _userManager.FindByNameAsync(user.UserName);
+            var userResult = await _userManager.Users.Where(u => !u.SoftDelete).FirstOrDefaultAsync(u => u.UserName == user.UserName);
 
             if (userResult is null)
                 return null;
@@ -66,7 +56,7 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> VerifyOtpCode(User user, string otpCode)
         {
-            var existUser = await _userManager.FindByNameAsync(user.UserName);
+            var existUser = await _userManager.Users.Where(u => !u.SoftDelete).FirstOrDefaultAsync(u => u.UserName == user.UserName);
 
             // expired
             if (existUser is null || existUser.OtpCode != otpCode)
@@ -95,7 +85,7 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> ResetPasswordAsync(string id, string CurrentPassword, string NewPassword)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _userManager.Users.Where(u => !u.SoftDelete).FirstOrDefaultAsync(u => u.Id == id);
 
             if (user is null)
                 return false;
@@ -115,7 +105,7 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> ForgotPasswordAsync(string userName, string newPassword, string otpCode)
         {
-            var user = await _userManager.FindByNameAsync(userName);
+            var user = await _userManager.Users.Where(u => !u.SoftDelete).FirstOrDefaultAsync(u => u.UserName == userName);
 
             if (user is null)
                 return false;
@@ -132,7 +122,7 @@ namespace Infrastructure.Repositories
 
         public async Task<User?> FindByIdAsync(string id)
         {
-            return await _userManager.FindByIdAsync(id);
+            return await _userManager.Users.Where(u => !u.SoftDelete).FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task UpdateUser(User user)
@@ -142,7 +132,12 @@ namespace Infrastructure.Repositories
 
         public async Task<List<string>> GetAdminUserIdsAsync()
         {
-            return await _userManager.Users.Where(u => u.Role == "Manager").Select(u => u.Id).ToListAsync();
+            return await _userManager.Users.Where(u => u.Role == "Manager" && !u.SoftDelete).Select(u => u.Id).ToListAsync();
+        }
+
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            return await _userManager.Users.Where(u => !u.SoftDelete).ToListAsync();
         }
     }
 }

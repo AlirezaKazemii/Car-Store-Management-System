@@ -37,6 +37,7 @@ namespace Infrastructure.Migrations
                     LastLogin = table.Column<DateTime>(type: "datetime2", nullable: true),
                     OtpCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     OtpGeneratedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    SoftDelete = table.Column<bool>(type: "bit", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -55,19 +56,6 @@ namespace Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Categories",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Categories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -229,30 +217,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CarCategory",
-                columns: table => new
-                {
-                    CarCategoriesId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CarsId = table.Column<string>(type: "nvarchar(450)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CarCategory", x => new { x.CarCategoriesId, x.CarsId });
-                    table.ForeignKey(
-                        name: "FK_CarCategory_Cars_CarsId",
-                        column: x => x.CarsId,
-                        principalTable: "Cars",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CarCategory_Categories_CarCategoriesId",
-                        column: x => x.CarCategoriesId,
-                        principalTable: "Categories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "CarImage",
                 columns: table => new
                 {
@@ -281,6 +245,7 @@ namespace Infrastructure.Migrations
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CustomerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     InvoiceNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -310,41 +275,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Reviews",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CarId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CustomerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Rating = table.Column<int>(type: "int", nullable: false),
-                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Reviews", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Reviews_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Reviews_Cars_CarId",
-                        column: x => x.CarId,
-                        principalTable: "Cars",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Reviews_Customers_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "Customers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Transactions",
                 columns: table => new
                 {
@@ -352,7 +282,7 @@ namespace Infrastructure.Migrations
                     OrderId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     TransactionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PaymentMethod = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PaymentReceiptFileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     ReferenceNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     BankName = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -374,10 +304,10 @@ namespace Infrastructure.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    TransactionId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TransactionId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
+                    IsSent = table.Column<bool>(type: "bit", nullable: false),
                     SentAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -393,8 +323,7 @@ namespace Infrastructure.Migrations
                         name: "FK_Notifications_Transactions_TransactionId",
                         column: x => x.TransactionId,
                         principalTable: "Transactions",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.InsertData(
@@ -447,11 +376,6 @@ namespace Infrastructure.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CarCategory_CarsId",
-                table: "CarCategory",
-                column: "CarsId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_CarImage_CarId",
                 table: "CarImage",
                 column: "CarId");
@@ -494,21 +418,6 @@ namespace Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Reviews_CarId",
-                table: "Reviews",
-                column: "CarId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Reviews_CustomerId",
-                table: "Reviews",
-                column: "CustomerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Reviews_UserId",
-                table: "Reviews",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Transactions_OrderId",
                 table: "Transactions",
                 column: "OrderId",
@@ -534,22 +443,13 @@ namespace Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "CarCategory");
-
-            migrationBuilder.DropTable(
                 name: "CarImage");
 
             migrationBuilder.DropTable(
                 name: "Notifications");
 
             migrationBuilder.DropTable(
-                name: "Reviews");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoles");
-
-            migrationBuilder.DropTable(
-                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "Transactions");

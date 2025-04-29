@@ -1,5 +1,6 @@
 ﻿using Application.Commands.Orders;
 using Application.Interfaces;
+using Application.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,9 +24,9 @@ namespace Car_Store_Management_System.Controllers
         [Authorize(Roles = "Buyer")]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderCommand command)
         {
-            await _orderService.CreateOrder(command.CarId, User);
+            await _orderService.CreateOrder(command, User);
 
-            return Ok("Order successfully placed.");
+            return Ok(new Result("Order successfully placed."));
         }
 
 
@@ -35,7 +36,7 @@ namespace Car_Store_Management_System.Controllers
         {
             await _orderService.ApproveOrders(orderId);
 
-            return Ok("Order confirmed");
+            return Ok(new Result("Order confirmed"));
         }
 
 
@@ -45,7 +46,7 @@ namespace Car_Store_Management_System.Controllers
         {
             await _orderService.RejectOrders(orderId);
 
-            return Ok("The order was rejected.");
+            return Ok(new Result("The order was rejected."));
         }
 
 
@@ -53,7 +54,8 @@ namespace Car_Store_Management_System.Controllers
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> GetAllPendingOrders()
         {
-            return Ok(await _orderService.GetAllPendingOrders());
+            var result = await _orderService.GetAllPendingOrders();
+            return Ok(new Result("",result));
         }
 
 
@@ -63,7 +65,7 @@ namespace Car_Store_Management_System.Controllers
         {
             await _orderService.UploadReceipt(command.OrderId, command.ReceiptFile, _env.WebRootPath);
 
-            return Ok("The receipt was successfully uploaded.");
+            return Ok(new Result("The receipt was successfully uploaded."));
         }
 
 
@@ -71,7 +73,8 @@ namespace Car_Store_Management_System.Controllers
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> GetAllPaymentUploadedOrders()
         {
-            return Ok(await _orderService.GetAllPaymentUploadedOrders());
+            var result = await _orderService.GetAllPaymentUploadedOrders();
+            return Ok(new Result("", result));
         }
 
 
@@ -79,9 +82,9 @@ namespace Car_Store_Management_System.Controllers
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> ApprovePayments(ApprovePaymentsCommand command)
         {
-            await _orderService.ApprovePayments(command.OrderId);
+            await _orderService.ApprovePayments(command);
 
-            return Ok("Payment confirmed.");
+            return Ok(new Result("Payment confirmed."));
         }
 
 
@@ -91,7 +94,7 @@ namespace Car_Store_Management_System.Controllers
         {
             await _orderService.RejectPayments(command.orderId);
 
-            return Ok("The order was rejected.");
+            return Ok(new Result("The order was rejected."));
         }
 
         [HttpGet("Generate-Invoice-FromOrder")]
@@ -100,7 +103,7 @@ namespace Car_Store_Management_System.Controllers
         {
             var Result = await _orderService.GenerateInvoiceFromOrder(command.OrderId);
 
-            return Ok(Result);
+            return Ok(new Result("",Result));
         }
 
 
@@ -110,7 +113,7 @@ namespace Car_Store_Management_System.Controllers
         {
             var orderResult = await _orderService.GetUserOrders(command.UserId);
 
-            return Ok(orderResult);
+            return Ok(new Result("",orderResult));
         }
     }
 }

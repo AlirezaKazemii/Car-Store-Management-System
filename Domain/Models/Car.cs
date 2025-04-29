@@ -23,8 +23,6 @@ namespace Domain.Models
         public User Seller { get; set; }
         public Order Order { get; set; }
         public ICollection<CarImage> Images { get; private set; }
-        public ICollection<Review> Reviews  { get; set; }
-        public ICollection<Category> CarCategories { get; private set; }
 
         public Car()
         {

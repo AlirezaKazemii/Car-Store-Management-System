@@ -18,7 +18,6 @@ namespace Domain.Models
 
         public User user { get; set; }
         public ICollection<Order> Orders { get; private set; }
-        public ICollection<Review> Reviews { get; set; }
 
         //امتیاز وفاداری یا امتیاز جمع شده
         public int LoyaltyPoints { get; private set; }
@@ -42,7 +41,6 @@ namespace Domain.Models
             CreatedAt = DateTime.Now;
             LoyaltyPoints = 0;
             Orders = new List<Order>();
-            Reviews = new List<Review>();
         }
 
         public void UpdateCustomer(string fullName, string email, string phoneNumber, string address)

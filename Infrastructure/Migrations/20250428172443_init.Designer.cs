@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250418042852_init")]
+    [Migration("20250428172443_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -25,19 +25,40 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("CarCategory", b =>
+            modelBuilder.Entity("Domain.Models.AppTransaction", b =>
                 {
-                    b.Property<string>("CarCategoriesId")
+                    b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("CarsId")
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("BankName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("CarCategoriesId", "CarsId");
+                    b.Property<string>("PaymentReceiptFileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasIndex("CarsId");
+                    b.Property<string>("ReferenceNumber")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("CarCategory");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Domain.Models.Car", b =>
@@ -110,23 +131,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("CarImage");
                 });
 
-            modelBuilder.Entity("Domain.Models.Category", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Categories");
-                });
-
             modelBuilder.Entity("Domain.Models.Customer", b =>
                 {
                     b.Property<string>("Id")
@@ -174,6 +178,9 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<bool>("IsSent")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -181,11 +188,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("SentAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
                     b.Property<string>("TransactionId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Type")
@@ -233,6 +236,9 @@ namespace Infrastructure.Migrations
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -247,80 +253,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Orders");
-                });
-
-            modelBuilder.Entity("Domain.Models.Review", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("CarId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CustomerId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CarId");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Reviews");
-                });
-
-            modelBuilder.Entity("Domain.Models.Transaction", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("BankName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OrderId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReferenceNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId")
-                        .IsUnique();
-
-                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Domain.Models.User", b =>
@@ -383,6 +315,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("SoftDelete")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -560,19 +495,15 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("CarCategory", b =>
+            modelBuilder.Entity("Domain.Models.AppTransaction", b =>
                 {
-                    b.HasOne("Domain.Models.Category", null)
-                        .WithMany()
-                        .HasForeignKey("CarCategoriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("Domain.Models.Order", "Order")
+                        .WithOne("Transaction")
+                        .HasForeignKey("Domain.Models.AppTransaction", "OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Models.Car", null)
-                        .WithMany()
-                        .HasForeignKey("CarsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("Domain.Models.Car", b =>
@@ -610,11 +541,9 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Models.Notification", b =>
                 {
-                    b.HasOne("Domain.Models.Transaction", "Transaction")
+                    b.HasOne("Domain.Models.AppTransaction", "Transaction")
                         .WithMany("Notifications")
-                        .HasForeignKey("TransactionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("TransactionId");
 
                     b.HasOne("Domain.Models.User", "user")
                         .WithMany("Notifications")
@@ -652,44 +581,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
 
                     b.Navigation("car");
-                });
-
-            modelBuilder.Entity("Domain.Models.Review", b =>
-                {
-                    b.HasOne("Domain.Models.Car", "Car")
-                        .WithMany("Reviews")
-                        .HasForeignKey("CarId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.Customer", "Customer")
-                        .WithMany("Reviews")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.User", "User")
-                        .WithMany("Reviews")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Car");
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Models.Transaction", b =>
-                {
-                    b.HasOne("Domain.Models.Order", "Order")
-                        .WithOne("Transaction")
-                        .HasForeignKey("Domain.Models.Transaction", "OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -743,32 +634,28 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Models.AppTransaction", b =>
+                {
+                    b.Navigation("Notifications");
+                });
+
             modelBuilder.Entity("Domain.Models.Car", b =>
                 {
                     b.Navigation("Images");
 
                     b.Navigation("Order")
                         .IsRequired();
-
-                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Domain.Models.Customer", b =>
                 {
                     b.Navigation("Orders");
-
-                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("Domain.Models.Order", b =>
                 {
                     b.Navigation("Transaction")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.Models.Transaction", b =>
-                {
-                    b.Navigation("Notifications");
                 });
 
             modelBuilder.Entity("Domain.Models.User", b =>
@@ -781,8 +668,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Notifications");
 
                     b.Navigation("Orders");
-
-                    b.Navigation("Reviews");
                 });
 #pragma warning restore 612, 618
         }

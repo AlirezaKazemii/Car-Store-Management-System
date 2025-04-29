@@ -1,7 +1,7 @@
 ﻿using Application.Commands.Customer;
 using Application.Interfaces;
+using Application.Shared;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Car_Store_Management_System.Controllers
@@ -22,9 +22,9 @@ namespace Car_Store_Management_System.Controllers
         [Authorize(Roles = "Buyer")]
         public async Task<IActionResult> RegisterOrUpdate(RegisterOrUpdateCustomerCommand command)
         {
-            await _customerService.RegisterOrUpdateCustomer(command,User);
+            await _customerService.RegisterOrUpdateCustomer(command, User);
 
-            return Ok("Customer saved successfully.");
+            return Ok(new Result("Customer saved successfully."));
         }
 
 
@@ -34,10 +34,10 @@ namespace Car_Store_Management_System.Controllers
         {
             var result = await _customerService.GetOrderHistories(User);
 
-            if(result.Count == 0)
-                return NotFound("No orders have been placed for this customer.");  
+            if (result.Count == 0)
+                return NotFound("No orders have been placed for this customer.");
 
-            return Ok(result);
+            return Ok(new Result("",result));
         }
 
 
@@ -47,7 +47,7 @@ namespace Car_Store_Management_System.Controllers
         {
             var result = await _customerService.GetLoyaltyPoints(User);
 
-            return Ok(result);
+            return Ok(new Result("", result));
         }
     }
 }

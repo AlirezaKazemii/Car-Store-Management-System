@@ -1,10 +1,12 @@
 ﻿using Application.Commands.Notification;
+using Application.Commands.Orders;
 using Application.DTOs.Orders;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Interfaces;
 using Domain.IRepostories;
 using Domain.Models;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 using static Domain.Models.Car;
@@ -23,8 +25,20 @@ namespace Application.Services
         private readonly ITransactionRepository _transactionRepository;
         private readonly ICustomerService _customerService;
         private readonly INotificationService _notificationService;
+        private readonly IValidator<CreateOrderCommand> _createOrderValidator;
+        private readonly IValidator<ApprovePaymentsCommand> _approvePaymentsValidator;
 
-        public OrderService(IOrderRepository orderRepository, ICarRepository carRepository, IUserRepository userRepository, ICustomerRepository customerRepository, IMapper mapper, ITransactionRepository transactionRepository, ICustomerService customerService, INotificationService notificationService)
+        public OrderService(IOrderRepository orderRepository,
+            ICarRepository carRepository,
+            IUserRepository userRepository,
+            ICustomerRepository customerRepository,
+            IMapper mapper,
+            ITransactionRepository transactionRepository,
+            ICustomerService customerService,
+            INotificationService notificationService,
+            IValidator<CreateOrderCommand> CreateOrderValidator,
+            IValidator<ApprovePaymentsCommand> ApprovePaymentsValidator
+            )
         {
             _orderRepository = orderRepository;
             _carRepository = carRepository;
@@ -34,11 +48,19 @@ namespace Application.Services
             _transactionRepository = transactionRepository;
             _customerService = customerService;
             _notificationService = notificationService;
+            _createOrderValidator = CreateOrderValidator;
+            _approvePaymentsValidator = ApprovePaymentsValidator;
         }
 
 
-        public async Task CreateOrder(string carId, ClaimsPrincipal user)
+        public async Task CreateOrder(CreateOrderCommand command, ClaimsPrincipal user)
         {
+
+            var validationResult = await _createOrderValidator.ValidateAsync(command);
+
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
             var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
@@ -59,7 +81,7 @@ namespace Application.Services
                 throw new Exception("No customer associated with this user found.");
 
             // Car
-            var existCar = await _carRepository.FindByIdAsync(carId);
+            var existCar = await _carRepository.FindByIdAsync(command.CarId);
 
             if (existCar is null)
                 throw new Exception("Car is not found!");
@@ -214,9 +236,15 @@ namespace Application.Services
             return orderListDto;
         }
 
-        public async Task ApprovePayments(string orderId)
+        public async Task ApprovePayments(ApprovePaymentsCommand command)
         {
-            var order = await _orderRepository.GetById(orderId);
+
+            var validationResult = await _approvePaymentsValidator.ValidateAsync(command);
+
+            if (!validationResult.IsValid)
+                throw new ValidationException(validationResult.Errors);
+
+            var order = await _orderRepository.GetById(command.OrderId);
 
             if(order is null)
                 throw new Exception("Order not found!");
